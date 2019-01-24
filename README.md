@@ -1,5 +1,32 @@
 # Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+We work with different languages and different data representation protocols. 
+
+SimplyWorks.Metadata is a set of abstractions and utilities that enable working with data of all binary forms from a unified business-level view.
+
+A number in C# - for example - has a hefty amount of different types with differing levels of capacity, accuracy and precision. All these types are needed to implement application features in an optimized way, but sometimes, we want to iron out all that and compare numbers regardless of their types. This is where the type 'Number' comes into play.
+
+Another example is when we want to group a set of key value pairs that represent one business concept into a type. In C#, this can be achieved with one the following: 
+- POCO with properties (Plain Old CLR Object)
+- Dictionary
+- Array of Key value pairs
+- Tuples
+- Dynamo objects
+- ... etc.
+
+We introduce the type 'DocumentKeyValueContainer' that allows us to deal the above in the same manner, a set of keys and values.
+
+These simple abstractions provide a fabric that supports the creation of the following:
+
+- Document Search
+
+- Analytics
+
+- Schema Management Systems
+
+- Data Transformation Systems
+
+- ... etc.
+
 
 # Getting Started
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
