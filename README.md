@@ -64,6 +64,8 @@ The vision of Metadata is to provide a fabric that supports the creation of the 
 
 - Content Management / Transformation Systems
 
+- Content-based Message Routing
+
 - Data Transformation Systems
 
 - ... etc.
