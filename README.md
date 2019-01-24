@@ -1,9 +1,10 @@
 # Introduction 
+
 We work with different languages and different data representation protocols. 
 
 SimplyWorks.Metadata is a set of abstractions and utilities that enable working with data of all binary forms from a unified business-level view.
 
-A number in C# - for example - has a hefty amount of different types with differing levels of capacity, accuracy and precision. All these types are needed to implement application features in an optimized way, but sometimes, we want to iron out all that and compare numbers regardless of their types. This is where the type 'Number' comes into play.
+A number in C# - for example - has a hefty amount of different representations with differing levels of capacity, accuracy and precision. All these types are needed to implement application features in an optimized way, but sometimes, we want to iron out all that and compare numbers regardless of their types. This is where the type 'Number' comes into play.
 
 Another example is when we want to group a set of key value pairs that represent one business concept into a type. In C#, this can be achieved with one the following: 
 - POCO with properties (Plain Old CLR Object)
@@ -15,13 +16,53 @@ Another example is when we want to group a set of key value pairs that represent
 
 We introduce the type 'DocumentKeyValueContainer' that allows us to deal the above in the same manner, a set of keys and values.
 
-These simple abstractions provide a fabric that supports the creation of the following:
+# Type System
+
+Metadata introduces a unified type system of the following basic types:
+
+- DocumentKeyValueContainer
+
+- DocumentValueList
+
+- Null
+
+- Number
+
+- Text
+
+- Boolean
+
+- DateTime
+
+# Comparison / Validation
+
+Also, Metadata provides a set of specifications / filter objects that can be used in combination to test whether a document satisfies certain conditions. Those include the following:
+
+- AllFilter
+
+- NoneFilter
+
+- AndFilter
+
+- OrFilter
+
+- EqualToFilter
+
+- ContainsFilter
+
+- ... More to be implemented
+
+
+
+The vision of Metadata is to provide a fabric that supports the creation of the following class of software:
 
 - Document Search
 
 - Analytics
 
 - Schema Management Systems
+
+- Content Management / Transformation Systems
 
 - Data Transformation Systems
 
