@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SW.Metadata.Core
 {
-    public class Document
+    public class DocumentContentReader
     {
 
 
@@ -41,7 +41,7 @@ namespace SW.Metadata.Core
             throw new NotSupportedException($"Cannot create a document value from type '{obj?.GetType()}'");
         }
 
-        public Document(object data, IEnumerable<IDocumentValueFactory> valueFactories = null)
+        public DocumentContentReader(object data, IEnumerable<IDocumentValueFactory> valueFactories = null)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
 
@@ -76,14 +76,14 @@ namespace SW.Metadata.Core
             return list.AsEnumerable(CreateValue);
         }
 
-        public Document CreateSub(IDocumentValue root)
+        public DocumentContentReader CreateSubReader(IDocumentValue root)
         {
             if (root == null)
             {
                 throw new ArgumentNullException(nameof(root));
             }
 
-            return new Document(root, _factories);
+            return new DocumentContentReader(root, _factories);
         }
 
         // TODO ... more relevant properties (e.g. document version perhaps? )

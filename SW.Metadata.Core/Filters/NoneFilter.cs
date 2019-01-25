@@ -23,7 +23,7 @@ namespace SW.Metadata.Core
             return 2049151605 + Type.GetHashCode();
         }
 
-        public bool IsMatch(Document document)
+        public bool IsMatch(DocumentContentReader document)
         {
             return false;
         }

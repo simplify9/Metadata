@@ -18,7 +18,7 @@ namespace SW.Metadata.Core
             ItemFilter = itemFilter ?? throw new ArgumentNullException(nameof(itemFilter));
         }
 
-        public bool IsMatch(Document document)
+        public bool IsMatch(DocumentContentReader document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             
@@ -28,7 +28,7 @@ namespace SW.Metadata.Core
                 var items = document.AsEnumerable(list);
                 foreach (var i in items)
                 {
-                    var subDocument = document.CreateSub(i);
+                    var subDocument = document.CreateSubReader(i);
                     if (ItemFilter.IsMatch(subDocument)) return true;
                 }
             }

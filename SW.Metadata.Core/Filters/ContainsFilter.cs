@@ -19,7 +19,7 @@ namespace SW.Metadata.Core
             ItemValue = itemValue ?? throw new ArgumentNullException(nameof(itemValue));
         }
         
-        public bool IsMatch(Document document)
+        public bool IsMatch(DocumentContentReader document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             

@@ -18,7 +18,7 @@ namespace SW.Metadata.Core
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public bool IsMatch(Document reader)
+        public bool IsMatch(DocumentContentReader reader)
         {
             if (!reader.TryEvaluate(Path, out IDocumentValue left))
             {

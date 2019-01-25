@@ -8,6 +8,6 @@ namespace SW.Metadata.Core
     {
         DocumentFilterType Type { get; }
 
-        bool IsMatch(Document document);
+        bool IsMatch(DocumentContentReader document);
     }
 }

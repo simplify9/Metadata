@@ -19,7 +19,7 @@ namespace SW.Metadata.Core
             Type = type;
         }
 
-        public abstract bool IsMatch(Document document);
+        public abstract bool IsMatch(DocumentContentReader document);
 
         public override bool Equals(object obj)
         {

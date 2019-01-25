@@ -18,7 +18,7 @@ namespace SW.Metadata.Core
 
         }
         
-        public override bool IsMatch(Document document)
+        public override bool IsMatch(DocumentContentReader document)
         {
             return Left.IsMatch(document) || Right.IsMatch(document);
         }
