@@ -81,6 +81,7 @@ namespace SW.Metadata.DQL.Parser
             var pathToken = q.DequeueAndValidate(TokenType.Path);
             var opToken = q.DequeueAndValidate(TokenType.Contains, TokenType.Equals);
             var constToken = q.DequeueAndValidate(
+                TokenType.OpenBracket,
                 TokenType.DateTime, 
                 TokenType.Number,
                 TokenType.TrueLiteral,
@@ -89,15 +90,21 @@ namespace SW.Metadata.DQL.Parser
                 TokenType.Null);
 
             var path = DocumentPath.Parse(pathToken.Value);
+
+            if (constToken.TokenType == TokenType.OpenBracket)
+            {
+                if (opToken.TokenType != TokenType.Contains)
+                {
+                    throw new ArgumentException($"Unexpected {constToken.TokenType}");
+                }
+
+                return new ContainsWhereFilter(path, ParseExpression(q));
+            }
+            
             var value = CreateValue(constToken);
-            if (opToken.TokenType == TokenType.Contains)
-            {
-                return new ContainsFilter(path, value);
-            }
-            else
-            {
-                return new EqualToFilter(path, value);
-            }
+            return opToken.TokenType == TokenType.Contains
+                ? (IDocumentFilter)new ContainsFilter(path, value)
+                : new EqualToFilter(path, value);
         }
 
         private IDocumentFilter ParseExpression(Queue<DslToken> q)
@@ -108,7 +115,6 @@ namespace SW.Metadata.DQL.Parser
             {
                 var lookAhead = q.Peek();
                 
-
                 if (lookAhead.TokenType == TokenType.Path) // Name = "John"
                 {
                     exp = ParseLeafExpression(q);

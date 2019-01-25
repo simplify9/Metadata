@@ -11,6 +11,11 @@ namespace SW.Metadata.DQL
     {
         static readonly DQLParser _parser = new DQLParser(new Tokenizer());
 
+        public static DQLParser.Issue[] TryParse(string dql, out IDocumentFilter result)
+        {
+            return _parser.TryParse(dql, out result);
+        }
+
         public static IDocumentFilter Parse(string dql)
         {
             if (dql == null) throw new ArgumentNullException(nameof(dql));
@@ -21,5 +26,7 @@ namespace SW.Metadata.DQL
 
             return result;
         }
+
+
     }
 }

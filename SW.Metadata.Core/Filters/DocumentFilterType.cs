@@ -10,6 +10,7 @@ namespace SW.Metadata.Core
         Or,
         EqualTo,
         Contains,
+        ContainsWhere,
         NotEqualTo,
         GreaterThan,
         GreaterThanOrEqual,

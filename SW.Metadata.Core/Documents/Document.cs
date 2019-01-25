@@ -14,6 +14,7 @@ namespace SW.Metadata.Core
         {
             // ORDER IS IMPORTANT !!
             new FromClrNullFactory(),
+            new FromDocumentValueFactory(),
             new FromJTokenFactory(),
             new FromClrStringFactory(),
             new FromClrBooleanFactory(),
@@ -49,6 +50,7 @@ namespace SW.Metadata.Core
             _factories = valueFactories == null
                 ? _defaultFactories 
                 : _defaultFactories.Concat(valueFactories);
+
             Root = CreateValue(data);
         }
 
@@ -72,6 +74,16 @@ namespace SW.Metadata.Core
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             return list.AsEnumerable(CreateValue);
+        }
+
+        public Document CreateSub(IDocumentValue root)
+        {
+            if (root == null)
+            {
+                throw new ArgumentNullException(nameof(root));
+            }
+
+            return new Document(root, _factories);
         }
 
         // TODO ... more relevant properties (e.g. document version perhaps? )
