@@ -4,23 +4,23 @@ using System.Text;
 
 namespace SW.Metadata.Core
 {
-    public class EqualToFilter : IDocumentFilter, IEquatable<EqualToFilter>
+    public class EqualToFilter : IContentFilter, IEquatable<EqualToFilter>
     {
-        public DocumentPath Path { get; private set; }
+        public ContentPath Path { get; private set; }
 
-        public IDocumentValue Value { get; private set; }
+        public IContentNode Value { get; private set; }
 
-        public DocumentFilterType Type => DocumentFilterType.EqualTo;
+        public ContentFilterType Type => ContentFilterType.EqualTo;
 
-        public EqualToFilter(DocumentPath path, IDocumentValue value)
+        public EqualToFilter(ContentPath path, IContentNode value)
         {
             Path = path ?? throw new ArgumentNullException(nameof(path));
             Value = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public bool IsMatch(DocumentContentReader reader)
+        public bool IsMatch(IContentNode value)
         {
-            if (!reader.TryEvaluate(Path, out IDocumentValue left))
+            if (!value.TryEvaluate(Path, out IContentNode left))
             {
                 return false;
             }
@@ -49,8 +49,8 @@ namespace SW.Metadata.Core
         public override int GetHashCode()
         {
             var hashCode = 368036125;
-            hashCode = hashCode * -1521134295 + EqualityComparer<DocumentPath>.Default.GetHashCode(Path);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IDocumentValue>.Default.GetHashCode(Value);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ContentPath>.Default.GetHashCode(Path);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentNode>.Default.GetHashCode(Value);
             hashCode = hashCode * -1521134295 + Type.GetHashCode();
             return hashCode;
         }

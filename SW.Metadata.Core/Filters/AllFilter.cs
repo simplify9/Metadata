@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SW.Metadata.Core
 {
-    public class AllFilter : IDocumentFilter, IEquatable<AllFilter>
+    public class AllFilter : IContentFilter, IEquatable<AllFilter>
     {
-        public DocumentFilterType Type => DocumentFilterType.All;
+        public ContentFilterType Type => ContentFilterType.All;
 
         public override bool Equals(object obj)
         {
@@ -23,7 +23,7 @@ namespace SW.Metadata.Core
             return 2049151605 + Type.GetHashCode();
         }
 
-        public bool IsMatch(DocumentContentReader document)
+        public bool IsMatch(IContentNode value)
         {
             return true;
         }

@@ -5,8 +5,4 @@
     <AssemblyName>SimplyWorks.Metadata.DQL</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SW.Metadata.Core\SW.Metadata.Core.csproj" />
-  </ItemGroup>
-
 </Project>

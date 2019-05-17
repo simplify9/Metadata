@@ -5,32 +5,35 @@ using System.Text;
 
 namespace SW.Metadata.Core
 {
-    public class ContainsFilter : IDocumentFilter, IEquatable<ContainsFilter>
+    public class ContainsFilter : IContentFilter, IEquatable<ContainsFilter>
     {
-        public DocumentPath ListPath { get; private set; }
+        public ContentPath ListPath { get; private set; }
 
-        public IDocumentValue ItemValue { get; private set; }
+        public IContentNode ItemValue { get; private set; }
 
-        public DocumentFilterType Type => DocumentFilterType.Contains;
+        public ContentFilterType Type => ContentFilterType.Contains;
 
-        public ContainsFilter(DocumentPath listPath, IDocumentValue itemValue)
+        public ContainsFilter(ContentPath listPath, IContentNode itemValue)
         {
             ListPath = listPath ?? throw new ArgumentNullException(nameof(listPath));
             ItemValue = itemValue ?? throw new ArgumentNullException(nameof(itemValue));
         }
         
-        public bool IsMatch(DocumentContentReader document)
+        public bool IsMatch(IContentNode document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             
-            if (!document.TryEvaluate(ListPath, out IDocumentValue left))
+            if (!document.TryEvaluate(ListPath, out IContentNode left))
             {
                 return false;
             }
             
-            return document
-                .AsEnumerable(left)
-                .Any(i => i.CompareWith(ItemValue) == ComparisonResult.EqualTo);
+            if (document is ContentList list)
+            {
+                return list.Items.Any(i => i.CompareWith(ItemValue) == ComparisonResult.EqualTo);
+            }
+
+            return false;
         }
 
         public override string ToString()
@@ -54,8 +57,8 @@ namespace SW.Metadata.Core
         public override int GetHashCode()
         {
             var hashCode = -1217978;
-            hashCode = hashCode * -1521134295 + EqualityComparer<DocumentPath>.Default.GetHashCode(ListPath);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IDocumentValue>.Default.GetHashCode(ItemValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<ContentPath>.Default.GetHashCode(ListPath);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentNode>.Default.GetHashCode(ItemValue);
             hashCode = hashCode * -1521134295 + Type.GetHashCode();
             return hashCode;
         }
