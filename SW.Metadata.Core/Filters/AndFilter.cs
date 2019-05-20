@@ -6,19 +6,19 @@ namespace SW.Metadata.Core
 {
     public class AndFilter : BinaryFilterBase
     {
-        string Enclose(IDocumentFilter exp)
+        string Enclose(IContentFilter exp)
         {
             if (exp is OrFilter) return $"({exp})";
             return exp.ToString();
         }
 
-        public AndFilter(IDocumentFilter left, IDocumentFilter right) 
-            : base(DocumentFilterType.And, left, right)
+        public AndFilter(IContentFilter left, IContentFilter right) 
+            : base(ContentFilterType.And, left, right)
         {
 
         }
         
-        public override bool IsMatch(DocumentContentReader document)
+        public override bool IsMatch(IContentNode document)
         {
             return Left.IsMatch(document) && Right.IsMatch(document);
         }

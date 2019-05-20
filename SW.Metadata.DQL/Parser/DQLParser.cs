@@ -9,14 +9,6 @@ namespace SW.Metadata.DQL.Parser
 {
     static class DslTokenQueueTExtensions
     {
-        public static IDocumentFilter Parse(string expressionText)
-        {
-            var parser = new DQLParser(new Tokenizer());
-            var issues = parser.TryParse(expressionText, out IDocumentFilter result);
-            if (issues.Any()) throw new ArgumentException(issues.First().CodeOrMessage);
-            return result;
-        }
-
         public static DslToken DequeueAndValidate(this Queue<DslToken> q, params TokenType[] expectedTypes)
         {
             if (q.Count < 1)
@@ -57,16 +49,16 @@ namespace SW.Metadata.DQL.Parser
 
         readonly Tokenizer _tokenizer;
 
-        IDocumentValue CreateValue(DslToken token)
+        IContentNode CreateValue(DslToken token)
         {
             switch (token.TokenType)
             {
-                case TokenType.DateTime: return new DateTimeValue(DateTime.Parse(token.Value, null, DateTimeStyles.RoundtripKind));
-                case TokenType.String: return new TextValue(token.Value.Substring(1, token.Value.Length - 2));
-                case TokenType.Number: return new NumericValue(decimal.Parse(token.Value));
-                case TokenType.Null: return new NullValue();
-                case TokenType.TrueLiteral: return new BooleanValue(true);
-                case TokenType.FalseLiteral: return new BooleanValue(false);
+                case TokenType.DateTime: return new ContentDateTime(DateTime.Parse(token.Value, null, DateTimeStyles.RoundtripKind));
+                case TokenType.String: return new ContentText(token.Value.Substring(1, token.Value.Length - 2));
+                case TokenType.Number: return new ContentNumber(decimal.Parse(token.Value));
+                case TokenType.Null: return new ContentNull();
+                case TokenType.TrueLiteral: return new ContentBoolean(true);
+                case TokenType.FalseLiteral: return new ContentBoolean(false);
                 default: throw new ArgumentException($"Unexpected token");
             }
         }
@@ -76,7 +68,7 @@ namespace SW.Metadata.DQL.Parser
             _tokenizer = tokenizer;
         }
 
-        private IDocumentFilter ParseLeafExpression(Queue<DslToken> q)
+        private IContentFilter ParseLeafExpression(Queue<DslToken> q)
         {
             var pathToken = q.DequeueAndValidate(TokenType.Path);
             var opToken = q.DequeueAndValidate(TokenType.Contains, TokenType.Equals);
@@ -89,7 +81,7 @@ namespace SW.Metadata.DQL.Parser
                 TokenType.String,
                 TokenType.Null);
 
-            var path = DocumentPath.Parse(pathToken.Value);
+            var path = ContentPath.Parse(pathToken.Value);
 
             if (constToken.TokenType == TokenType.OpenBracket)
             {
@@ -98,19 +90,21 @@ namespace SW.Metadata.DQL.Parser
                     throw new ArgumentException($"Unexpected {constToken.TokenType}");
                 }
 
-                return new ContainsWhereFilter(path, ParseExpression(q));
+                var subExp = ParseExpression(q);
+                q.DequeueAndValidate(TokenType.CloseBracket);
+                return new ContainsWhereFilter(path, subExp);
             }
             
             var value = CreateValue(constToken);
             return opToken.TokenType == TokenType.Contains
-                ? (IDocumentFilter)new ContainsFilter(path, value)
+                ? (IContentFilter)new ContainsFilter(path, value)
                 : new EqualToFilter(path, value);
         }
 
-        private IDocumentFilter ParseExpression(Queue<DslToken> q)
+        private IContentFilter ParseExpression(Queue<DslToken> q)
         {
 
-            IDocumentFilter exp = null;
+            IContentFilter exp = null;
             while (q.Count > 0)
             {
                 var lookAhead = q.Peek();
@@ -152,7 +146,7 @@ namespace SW.Metadata.DQL.Parser
             return exp;
         }
 
-        public Issue[] TryParse(string text, out IDocumentFilter result)
+        public Issue[] TryParse(string text, out IContentFilter result)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
 

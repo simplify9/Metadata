@@ -4,22 +4,22 @@ using System.Text;
 
 namespace SW.Metadata.Core
 {
-    public abstract class BinaryFilterBase : IDocumentFilter, IEquatable<BinaryFilterBase>
+    public abstract class BinaryFilterBase : IContentFilter, IEquatable<BinaryFilterBase>
     {
-        public IDocumentFilter Left { get; private set; }
+        public IContentFilter Left { get; private set; }
 
-        public IDocumentFilter Right { get; private set; }
+        public IContentFilter Right { get; private set; }
         
-        public DocumentFilterType Type { get; }
+        public ContentFilterType Type { get; }
 
-        protected BinaryFilterBase(DocumentFilterType type, IDocumentFilter left, IDocumentFilter right)
+        protected BinaryFilterBase(ContentFilterType type, IContentFilter left, IContentFilter right)
         {
             Left = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
             Type = type;
         }
 
-        public abstract bool IsMatch(DocumentContentReader document);
+        public abstract bool IsMatch(IContentNode document);
 
         public override bool Equals(object obj)
         {
@@ -37,8 +37,8 @@ namespace SW.Metadata.Core
         public override int GetHashCode()
         {
             var hashCode = -412577974;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IDocumentFilter>.Default.GetHashCode(Left);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IDocumentFilter>.Default.GetHashCode(Right);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentFilter>.Default.GetHashCode(Left);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentFilter>.Default.GetHashCode(Right);
             hashCode = hashCode * -1521134295 + Type.GetHashCode();
             return hashCode;
         }

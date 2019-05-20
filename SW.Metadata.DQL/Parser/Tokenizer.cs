@@ -22,7 +22,7 @@ namespace SW.Metadata.DQL.Parser
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Path, @"([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*(\.([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*)*", 2));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Contains, "contains", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Equals, "equals|=", 1));
-            _tokenDefinitions.Add(new TokenDefinition(TokenType.DateTime, DateTimeValue.Regex, 1));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.DateTime, ContentDateTime.Regex, 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.String, "\"((\\.)|[^\\\\\"])*\"", 0));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Number, @"[\+\-]?\d+\.?[Ee]?[\+\-]?\d*", 2));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.TrueLiteral, "true", 1));
