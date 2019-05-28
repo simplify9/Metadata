@@ -8,9 +8,19 @@ namespace SW.Content.Expressions
     {
         readonly ContentObject _data;
 
+        public bool TryEvaluate(ContentPath path, out IContentNode result)
+        {
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            return _data.TryEvaluate(path, out result);
+        }
+
         public LexicalScope(ContentObject data)
         {
-            _data = data;
+            _data = data ?? throw new ArgumentNullException(nameof(data));
         }
     }
 }

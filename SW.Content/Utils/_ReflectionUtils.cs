@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SW.Content.Factories
+namespace SW.Content.Utils
 {
     static class ReflectionUtils
     {
