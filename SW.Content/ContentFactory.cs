@@ -39,7 +39,7 @@ namespace SW.Content
 
                 if (value != null) return value;
 
-                throw new NotSupportedException($"Cannot create a content from type '{from?.GetType().AssemblyQualifiedName}'");
+                throw new NotSupportedException($"Cannot create a content node from type '{from?.GetType().AssemblyQualifiedName}'");
             }
         }
 

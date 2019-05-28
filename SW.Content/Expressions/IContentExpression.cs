@@ -6,6 +6,6 @@ namespace SW.Content.Expressions
 {
     public interface IContentExpression
     {
-        bool TryEvaluate(LexicalScope scope, out IContentNode result);
+        ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result);
     }
 }

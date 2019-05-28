@@ -10,6 +10,8 @@ namespace SW.Content
     {
         readonly Dictionary<string, object> _keyValues;
         readonly IContentFactory _contentFactory;
+        
+        public IEnumerable<string> Keys { get { return _keyValues.Keys; } }
 
         public ContentObject(IEnumerable<KeyValuePair<string, object>> keyValues, IContentFactory contentFactory)
         {
