@@ -1,71 +1,23 @@
 ﻿
+using SW.Content.Filters;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace SW.Content.Filters.Parser
+namespace SW.Content.Serialization
 {
-    static class DslTokenQueueTExtensions
-    {
-        public static DslToken DequeueAndValidate(this Queue<DslToken> q, params TokenType[] expectedTypes)
-        {
-            if (q.Count < 1)
-            {
-                throw new ArgumentException("Unexpected end");
-            }
-
-            var next = q.Peek();
-            if (!expectedTypes.Contains(next.TokenType))
-            {
-                throw new ArgumentException($"Unexpected {next.TokenType}");
-            }
-
-            return q.Dequeue();
-        }
-    }
+    
 
     public class ContentFilterParser
     {
-        static readonly TokenType[] _constantNodes =
-        {
-            TokenType.String,
-            TokenType.Number,
-            TokenType.Null,
-            TokenType.DateTime,
-            TokenType.TrueLiteral,
-            TokenType.FalseLiteral
-        };
         
-        public class Issue
-        {
-            public int Index { get; set; }
-
-            public string Value { get; set; }
-
-            public string CodeOrMessage { get; set; }
-        }
-
         readonly Tokenizer _tokenizer;
-
-        IContentNode CreateValue(DslToken token)
-        {
-            switch (token.TokenType)
-            {
-                case TokenType.DateTime: return new ContentDateTime(DateTime.Parse(token.Value, null, DateTimeStyles.RoundtripKind));
-                case TokenType.String: return new ContentText(token.Value.Substring(1, token.Value.Length - 2));
-                case TokenType.Number: return new ContentNumber(decimal.Parse(token.Value));
-                case TokenType.Null: return new ContentNull();
-                case TokenType.TrueLiteral: return new ContentBoolean(true);
-                case TokenType.FalseLiteral: return new ContentBoolean(false);
-                default: throw new ArgumentException($"Unexpected token");
-            }
-        }
-
+        
         public ContentFilterParser(Tokenizer tokenizer)
         {
-            _tokenizer = tokenizer;
+            _tokenizer = tokenizer ?? throw new ArgumentNullException(nameof(tokenizer));
         }
 
         private IContentFilter ParseLeafExpression(Queue<DslToken> q)
@@ -95,7 +47,7 @@ namespace SW.Content.Filters.Parser
                 return new ContainsWhereFilter(path, subExp);
             }
             
-            var value = CreateValue(constToken);
+            var value = constToken.CreateValue();
             return opToken.TokenType == TokenType.Contains
                 ? (IContentFilter)new ContainsFilter(path, value)
                 : new EqualToFilter(path, value);
@@ -146,7 +98,7 @@ namespace SW.Content.Filters.Parser
             return exp;
         }
 
-        public Issue[] TryParse(string text, out IContentFilter result)
+        public ParserIssue[] TryParse(string text, out IContentFilter result)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
 
@@ -160,11 +112,11 @@ namespace SW.Content.Filters.Parser
 
                 result = ParseExpression(q);
 
-                return new Issue[] { };
+                return new ParserIssue[] { };
             }
             catch (Exception ex)
             {
-                return new Issue[] { new Issue { CodeOrMessage = ex.Message } };
+                return new ParserIssue[] { new ParserIssue { CodeOrMessage = ex.Message } };
             }
         }
         

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SW.Content.Filters.Parser
+namespace SW.Content.Serialization
 {
     public enum TokenType
     {
@@ -19,6 +19,19 @@ namespace SW.Content.Filters.Parser
         CloseBracket,
         TrueLiteral,
         FalseLiteral,
-        SequenceTerminator
+        
+        SequenceTerminator,
+
+        Comma,
+        Colon,
+        Dot,
+        SpreadDots,
+        OpenCurly,
+        CloseCurly,
+        OpenSquareBracket,
+        CloseSquareBracket,
+        DollarSign,
+
+        Identifier
     }
 }
