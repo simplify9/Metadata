@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace SW.Content.Filters.Parser
+namespace SW.Content.Serialization
 {
     public class TokenDefinition
     {

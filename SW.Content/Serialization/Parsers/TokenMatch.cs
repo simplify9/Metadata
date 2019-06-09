@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SW.Content.Filters.Parser
+namespace SW.Content.Serialization
 {
     public class TokenMatch
     {

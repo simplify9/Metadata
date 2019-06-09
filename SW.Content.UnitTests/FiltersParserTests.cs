@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SW.Content.Filters;
-using SW.Content.Filters.Parser;
+using SW.Content.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Text;

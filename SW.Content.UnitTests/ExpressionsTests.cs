@@ -24,10 +24,19 @@ namespace SW.Content.UnitTests
                 { "name", "John" }
             }, ContentFactory.Default));
 
-            var e = new CreateObjectExpression(new Dictionary<string, IContentExpression>
+            var e = new CreateObjectExpression(new List<CreateObjectExpression.Element>
             {
-                { "name", new ScopeVariableExpression(ContentPath.Parse("name")) },
-                { "age", new ConstantExpression(new ContentNumber(45)) }
+                new CreateObjectExpression.Attribute
+                {
+                    Name = "name",
+                    Value = new PathExpression(ContentPath.Parse("name"), new ScopeRootExpression())
+                },
+
+                new CreateObjectExpression.Attribute
+                {
+                    Name = "age",
+                    Value = new ConstantExpression(new ContentNumber(45))
+                }
             });
 
             var issue = e.TryEvaluate(scope, out IContentNode result);
