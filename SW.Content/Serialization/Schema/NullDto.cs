@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SW.Content.Schema
+namespace SW.Content.Serialization.Schema
 {
-    public class MustBeWholeNumber : MustHaveType<ContentNumber>
+    public class NullDto : ContentSchemaNodeDto
     {
         
     }

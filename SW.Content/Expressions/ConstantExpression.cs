@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using SW.Content.Schema;
 
 namespace SW.Content.Expressions
 {
@@ -39,7 +40,7 @@ namespace SW.Content.Expressions
         {
             return 1715951373 + EqualityComparer<IContentNode>.Default.GetHashCode(Constant);
         }
-
+        
         public static bool operator ==(ConstantExpression expression1, ConstantExpression expression2)
         {
             return EqualityComparer<ConstantExpression>.Default.Equals(expression1, expression2);

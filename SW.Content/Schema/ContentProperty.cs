@@ -11,7 +11,7 @@ namespace SW.Content.Schema
         public bool IsRequired { get; private set; }
 
         public IMust Value { get; private set; }
-
+        
         public ContentProperty(string key, IMust value, bool isRequired)
         {
             Key = key;

@@ -32,6 +32,6 @@ namespace SW.Content.Serialization
         CloseSquareBracket,
         DollarSign,
 
-        Identifier
+        //Identifier
     }
 }

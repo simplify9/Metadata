@@ -22,6 +22,9 @@ namespace SW.Content.Serialization
 
         private IContentFilter ParseLeafExpression(Queue<DslToken> q)
         {
+
+
+
             var pathToken = q.DequeueAndValidate(TokenType.Path);
             var opToken = q.DequeueAndValidate(TokenType.Contains, TokenType.Equals);
             var constToken = q.DequeueAndValidate(

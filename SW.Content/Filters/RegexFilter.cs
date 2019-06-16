@@ -13,7 +13,12 @@ namespace SW.Content.Filters
 
         public bool IsMatch(IContentNode document)
         {
-            throw new NotImplementedException();
+            if (document is ContentText text)
+            {
+                return Regex.IsMatch(text.Value);
+            }
+
+            return false;
         }
 
         public RegexFilter(string regex)

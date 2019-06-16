@@ -30,7 +30,8 @@ namespace SW.Content.Filters
             
             if (document is ContentList list)
             {
-                return list.Items.Any(i => i.CompareWith(ItemValue) == ComparisonResult.EqualTo);
+                return list.Items
+                    .Any(i => i.CompareWith(ItemValue) == ComparisonResult.EqualTo);
             }
 
             return false;
