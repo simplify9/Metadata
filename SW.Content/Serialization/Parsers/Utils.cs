@@ -33,7 +33,7 @@ namespace SW.Content.Serialization
                 case TokenType.Null: return new ContentNull();
                 case TokenType.TrueLiteral: return new ContentBoolean(true);
                 case TokenType.FalseLiteral: return new ContentBoolean(false);
-                default: throw new ArgumentException($"Unexpected token");
+                default: throw new ParserException($"Unexpected token", token);
             }
         }
 
@@ -41,13 +41,13 @@ namespace SW.Content.Serialization
         {
             if (q.Count < 1)
             {
-                throw new ArgumentException("Unexpected end");
+                throw new ParserException("Unexpected end", null);
             }
 
             var next = q.Peek();
             if (!expectedTypes.Contains(next.TokenType))
             {
-                throw new ArgumentException($"Unexpected {next.TokenType}");
+                throw new ParserException("Unexpected token", next);
             }
 
             return q.Dequeue();

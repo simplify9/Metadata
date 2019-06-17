@@ -1,4 +1,5 @@
 ﻿using SW.Content.Expressions;
+using SW.Content.Filters;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,12 +15,7 @@ namespace SW.Content.Serialization
         {
             return new ConstantExpression(token.CreateValue());
         }
-
-        PathExpression CreatePathExpression(DslToken token)
-        {
-            return new PathExpression(ContentPath.Parse(token.Value), new ScopeRootExpression());
-        }
-
+        
         CreateListExpression CreateListExpression(Queue<DslToken> q)
         {
             var items = new List<CreateListExpression.Element>();
@@ -62,7 +58,7 @@ namespace SW.Content.Serialization
 
         KeyValuePair<string,IContentExpression> CreateAttribute(Queue<DslToken> q)
         {
-            var keyToken = q.DequeueAndValidate(TokenType.Path);
+            var keyToken = q.DequeueAndValidate(TokenType.Identifier);
             var key = keyToken.Value;
 
             q.DequeueAndValidate(TokenType.Colon);
@@ -98,7 +94,7 @@ namespace SW.Content.Serialization
                             t.TokenType == TokenType.Comma)
                     });
                 }
-                else if (lookAhead.TokenType == TokenType.Path)
+                else if (lookAhead.TokenType == TokenType.Identifier)
                 {
                     var a = CreateAttribute(q);
                     attributes.Add(new CreateObjectExpression.Attribute
@@ -113,7 +109,7 @@ namespace SW.Content.Serialization
                 }
                 else
                 {
-                    throw new ArgumentException($"Unexpected {lookAhead.TokenType}");
+                    throw new ParserException($"Unexpected token", lookAhead);
                 }
             }
 
@@ -140,39 +136,119 @@ namespace SW.Content.Serialization
 
                 else if (lookAhead.IsConstant())
                 {
+                    if (exp != null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(Utils.ConstantTokens);
                     exp = CreateConstant(token);
                 }
 
+                else if (lookAhead.TokenType == TokenType.Equals)
+                {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
+                    var token = q.DequeueAndValidate(TokenType.Equals);
+                    exp = new EqualToFilter(exp, 
+                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t)));
+                }
+
+                else if (lookAhead.TokenType == TokenType.Contains)
+                {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
+                    var token = q.DequeueAndValidate(TokenType.Contains);
+                    exp = new ContainsFilter(exp, 
+                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t)));
+                }
+
+                else if (lookAhead.TokenType == TokenType.MatchRegex)
+                {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
+                    var token = q.DequeueAndValidate(TokenType.MatchRegex);
+                    var pattern = q.DequeueAndValidate(TokenType.String);
+                    exp = new RegexFilter(exp, pattern.Value);
+                }
+
+                else if (lookAhead.TokenType == TokenType.And)
+                {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
+                    var token = q.DequeueAndValidate(TokenType.And);
+                    if (exp is IContentFilter leftBool)
+                    {
+                        var right = ParseExpression(q, terminate);
+                        if (right is IContentFilter rightBool)
+                        {
+                            exp = new AndFilter(leftBool, rightBool);
+                        }
+                        else
+                        {
+                            throw new ParserException("AND cannot have a right operand that does not yield boolean", token);
+                        }
+                    }
+                    else
+                    {
+                        throw new ParserException("AND cannot have a left operand that does not yield boolean", token);
+                    }
+                }
+
+                else if (lookAhead.TokenType == TokenType.Or)
+                {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
+                    var token = q.DequeueAndValidate(TokenType.Or);
+                    if (exp is IContentFilter leftBool)
+                    {
+                        var right = ParseExpression(q, terminate);
+                        if (right is IContentFilter rightBool)
+                        {
+                            exp = new OrFilter(leftBool, rightBool);
+                        }
+                        else
+                        {
+                            throw new ParserException("OR cannot have a right operand that does not yield boolean", token);
+                        }
+                    }
+                    else
+                    {
+                        throw new ParserException("OR cannot have a left operand that does not yield boolean", token);
+                    }
+                }
+
                 else if (lookAhead.TokenType == TokenType.Path)
                 {
+                    if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(TokenType.Path);
-                    exp = CreatePathExpression(token);
+                    exp = new PathExpression(exp, ContentPath.Parse(token.Value.TrimStart('.')));
+                }
+
+                else if (lookAhead.TokenType == TokenType.DollarSign)
+                {
+                    if (exp != null) throw new ParserException($"Unexpected token", lookAhead);
+                    q.DequeueAndValidate(TokenType.DollarSign);
+                    exp = new ScopeRootExpression();
                 }
 
                 else if (lookAhead.TokenType == TokenType.OpenCurly)
                 {
+                    if (exp != null) throw new ParserException($"Unexpected token", lookAhead);
                     exp = CreateObjectExpression(q);
                 }
 
                 else if (lookAhead.TokenType == TokenType.OpenSquareBracket)
                 {
+                    if (exp != null) throw new ParserException($"Unexpected token", lookAhead);
                     exp = CreateListExpression(q);
                 }
                 
                 else if (lookAhead.TokenType == TokenType.OpenBracket)
                 {
+                    if (exp != null) throw new ParserException($"Unexpected token", lookAhead);
                     q.DequeueAndValidate(TokenType.OpenBracket); // open bracket (
                     exp = ParseExpression(q, t => t.TokenType == TokenType.CloseBracket);
                     q.DequeueAndValidate(TokenType.CloseBracket); // close bracket )
                 }
                 else
                 {
-                    throw new ArgumentException($"Unexpected {lookAhead.TokenType}");
+                    throw new ParserException($"Unexpected token", lookAhead);
                 }
             }
 
-            if (exp == null) throw new ArgumentException("Unexpected end of text");
+            if (exp == null) throw new ParserException($"Unexpected end", null);
 
             return exp;
         }
@@ -193,9 +269,17 @@ namespace SW.Content.Serialization
 
                 return new ParserIssue[] { };
             }
-            catch (Exception ex)
+            catch (ParserException ex)
             {
-                return new ParserIssue[] { new ParserIssue { CodeOrMessage = ex.Message } };
+                return new ParserIssue[] 
+                {
+                    new ParserIssue
+                    {
+                        CodeOrMessage = ex.Message,
+                        Index = ex.Token?.Match.StartIndex ?? (text.Length - 1),
+                        Value = ex.Token?.Value
+                    }
+                };
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SW.Content.Serialization.Schema;
+using SW.Content.Expressions;
 
 namespace SW.Content.UnitTests
 {
@@ -26,7 +27,7 @@ namespace SW.Content.UnitTests
                     new ContentProperty("Salary", new MustBeObject(new ContentProperty[]
                     {
                         new ContentProperty("Amount", new MustHaveType<ContentNumber>(noRules), true),
-                        new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter("^[A-Z]{3,3}$")) }), true)
+                        new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter(new ScopeRootExpression(), "^[A-Z]{3,3}$")) }), true)
                     }, noRules), true)
                 }, noRules));
 

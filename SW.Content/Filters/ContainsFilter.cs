@@ -1,37 +1,40 @@
-﻿using System;
+﻿using SW.Content.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace SW.Content.Filters
 {
-    public class ContainsFilter : IContentFilter, IEquatable<ContainsFilter>
+    public class ContainsFilter : ContentFilterBase, IEquatable<ContainsFilter>
     {
-        public ContentPath ListPath { get; private set; }
+        public IContentExpression List { get; private set; }
 
-        public IContentNode ItemValue { get; private set; }
+        public IContentExpression Item { get; private set; }
 
-        public ContentFilterType Type => ContentFilterType.Contains;
+        public override ContentFilterType Type => ContentFilterType.Contains;
+        
 
-        public ContainsFilter(ContentPath listPath, IContentNode itemValue)
+        public ContainsFilter(IContentExpression list, IContentExpression item)
         {
-            ListPath = listPath ?? throw new ArgumentNullException(nameof(listPath));
-            ItemValue = itemValue ?? throw new ArgumentNullException(nameof(itemValue));
+            List = list ?? throw new ArgumentNullException(nameof(list));
+            Item = item ?? throw new ArgumentNullException(nameof(item));
         }
         
-        public bool IsMatch(IContentNode document)
+        public override bool IsMatch(IContentNode document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
-            
-            if (!document.TryEvaluate(ListPath, out IContentNode left))
-            {
-                return false;
-            }
-            
-            if (document is ContentList list)
+
+            var leftIssue = List.TryEvaluate(document, out IContentNode left);
+            if (leftIssue != null) return false;
+
+            var rightIssue = Item.TryEvaluate(document, out IContentNode right);
+            if (rightIssue != null) return false;
+
+            if (left is ContentList list)
             {
                 return list.Items
-                    .Any(i => i.CompareWith(ItemValue) == ComparisonResult.EqualTo);
+                    .Any(i => i.CompareWith(right) == ComparisonResult.EqualTo);
             }
 
             return false;
@@ -39,7 +42,7 @@ namespace SW.Content.Filters
 
         public override string ToString()
         {
-            return $"{ListPath} CONTAINS {ItemValue}";
+            return $"{List} CONTAINS {Item}";
         }
 
         public override bool Equals(object obj)
@@ -51,15 +54,15 @@ namespace SW.Content.Filters
         {
             return other != null &&
                     Type == other.Type &&
-                    ListPath.Equals(other.ListPath) &&
-                    ItemValue.Equals(other.ItemValue);
+                    List.Equals(other.List) &&
+                    Item.Equals(other.Item);
         }
 
         public override int GetHashCode()
         {
             var hashCode = -1217978;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ContentPath>.Default.GetHashCode(ListPath);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IContentNode>.Default.GetHashCode(ItemValue);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(List);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Item);
             hashCode = hashCode * -1521134295 + Type.GetHashCode();
             return hashCode;
         }

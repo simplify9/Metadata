@@ -14,7 +14,7 @@ namespace SW.Content.Expressions
             Constant = constant ?? throw new ArgumentNullException(nameof(constant));
         }
 
-        public ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result)
+        public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
             result = Constant;
 

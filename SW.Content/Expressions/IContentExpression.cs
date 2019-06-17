@@ -9,6 +9,6 @@ namespace SW.Content.Expressions
     {
         
 
-        ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result);
+        ExpressionIssue TryEvaluate(IContentNode node, out IContentNode result);
     }
 }

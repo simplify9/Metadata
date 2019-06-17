@@ -27,7 +27,7 @@ namespace SW.Content.UnitTests
                 new CreateObjectExpression.Attribute
                 {
                     Name = "subName",
-                    Value = new PathExpression(ContentPath.Parse("name"), new ScopeRootExpression())
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
                 },
 
                 new CreateObjectExpression.Attribute
@@ -37,12 +37,12 @@ namespace SW.Content.UnitTests
                 }
             });
 
-            Test("{ name: name, age: 45, ...{ subName: name, subAge: 45 } }", new CreateObjectExpression(new List<CreateObjectExpression.Element>
+            Test("{ name: $.name, age: 45, ...{ subName: $.name, subAge: 45 } }", new CreateObjectExpression(new List<CreateObjectExpression.Element>
             {
                 new CreateObjectExpression.Attribute
                 {
                     Name = "name",
-                    Value = new PathExpression(ContentPath.Parse("name"), new ScopeRootExpression())
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
                 },
 
                 new CreateObjectExpression.Attribute
