@@ -19,6 +19,7 @@ namespace SW.Content
                 case ContentBoolean _: return Content.ContentType.Boolean;
                 case ContentList _: return Content.ContentType.List;
                 case ContentObject _: return Content.ContentType.Object;
+                case ContentEntity _: return Content.ContentType.Entity;
                 default: throw new NotImplementedException("No mapping");
             }
 

@@ -1,9 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SW.Content.Filters;
 using SW.Content.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using SW.Content.Serialization.Schema;
+using SW.Content.Expressions;
 
 namespace SW.Content.UnitTests
 {
@@ -13,20 +16,20 @@ namespace SW.Content.UnitTests
         [TestMethod]
         public void Test_Validation()
         {
-            
+            var noRules = new ContentSchemaRule[] { };
             var employeeSchema = new ContentSchema(new MustBeObject(
                 new ContentProperty[]
                 {
-                    new ContentProperty("Id", new MustBeWholeNumber(), true),
-                    new ContentProperty("Name", new MustHaveType<ContentText>(), true),
+                    new ContentProperty("Id", new MustHaveType<ContentNumber>(noRules), true),
+                    new ContentProperty("Name", new MustHaveType<ContentText>(noRules), true),
                     new ContentProperty("Phones", new MustBeList(
-                        new MustHaveType<ContentText>(), 1, 3), false),
+                        new MustHaveType<ContentText>(noRules), 1, 3, noRules), false),
                     new ContentProperty("Salary", new MustBeObject(new ContentProperty[]
                     {
-                        new ContentProperty("Amount", new MustHaveType<ContentNumber>(), true),
-                        new ContentProperty("Currency", new MustMatchRegex("^[A-Z]{3,3}$"), true)
-                    }), true)
-                }));
+                        new ContentProperty("Amount", new MustHaveType<ContentNumber>(noRules), true),
+                        new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter(new ScopeRootExpression(), "^[A-Z]{3,3}$")) }), true)
+                    }, noRules), true)
+                }, noRules));
 
             var issues = employeeSchema
                 .FindIssues(ContentFactory.Default.CreateFrom(Employee.Sample))
@@ -45,6 +48,8 @@ namespace SW.Content.UnitTests
 
             var expectedSubject = new ContentPath(new[] { nameof(Employee.Salary), nameof(Money.Currency) });
             Assert.AreEqual(expectedSubject, issues[0].SubjectPath);
+
+            var dto = employeeSchema.Root.ToDto();
 
             // object(id*:wholenumber[1:3],name:text,phones:list[1:3](text)
         }

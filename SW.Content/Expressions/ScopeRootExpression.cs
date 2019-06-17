@@ -6,11 +6,10 @@ namespace SW.Content.Expressions
 {
     public class ScopeRootExpression : IContentExpression
     {
-        public ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result)
+        public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
-            return scope.TryEvaluate(ContentPath.Root(), out result)
-                ? null 
-                : new ExpressionIssue("No lexical scope provided");
+            result = input;
+            return null;
         }
 
         public override string ToString()

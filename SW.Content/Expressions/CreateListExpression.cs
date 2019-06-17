@@ -55,12 +55,12 @@ namespace SW.Content.Expressions
             Items = items ?? throw new ArgumentNullException(nameof(items));
         }
 
-        public ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result)
+        public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
             var list = new List<IContentNode>();
             foreach (var e in Items)
             {
-                var issue = e.Value.TryEvaluate(scope, out IContentNode item);
+                var issue = e.Value.TryEvaluate(input, out IContentNode item);
                 if (issue != null)
                 {
                     result = null;

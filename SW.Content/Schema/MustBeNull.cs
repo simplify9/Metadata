@@ -6,6 +6,9 @@ namespace SW.Content.Schema
 {
     public class MustBeNull : MustHaveType<ContentNull>
     {
-        
+        public MustBeNull() : base(new ContentSchemaRule[] { })
+        {
+
+        }
     }
 }

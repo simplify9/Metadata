@@ -4,9 +4,9 @@ using System.Text;
 
 namespace SW.Content.Filters
 {
-    public class NoneFilter : IContentFilter, IEquatable<NoneFilter>
+    public class NoneFilter : ContentFilterBase, IEquatable<NoneFilter>
     {
-        public ContentFilterType Type => ContentFilterType.None;
+        public override ContentFilterType Type => ContentFilterType.None;
 
         public override bool Equals(object obj)
         {
@@ -23,7 +23,7 @@ namespace SW.Content.Filters
             return 2049151605 + Type.GetHashCode();
         }
 
-        public bool IsMatch(IContentNode document)
+        public override bool IsMatch(IContentNode document)
         {
             return false;
         }

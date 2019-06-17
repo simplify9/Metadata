@@ -13,7 +13,9 @@ namespace SW.Content.Schema
 
         public int? MaxItemCount { get; private set; }
 
-        public MustBeList(IMust item, int? minCount, int? MaxCount)
+        
+        public MustBeList(IMust item, int? minCount, int? MaxCount, IEnumerable<ContentSchemaRule> rules)
+            : base(rules)
         {
             Item = item ?? throw new ArgumentNullException(nameof(item));
             MinItemCount = minCount;
@@ -31,6 +33,8 @@ namespace SW.Content.Schema
             else
             {
                 var list = node as ContentList;
+
+                
 
                 var itemCount = list.Items.Count();
                 if ((MinItemCount != null && MinItemCount.Value > itemCount) ||

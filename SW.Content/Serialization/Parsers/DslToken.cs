@@ -6,24 +6,28 @@ namespace SW.Content.Serialization
 {
     public class DslToken
     {
+
+
         public DslToken(TokenType tokenType)
         {
             TokenType = tokenType;
             Value = string.Empty;
         }
 
-        public DslToken(TokenType tokenType, string value)
+        public DslToken(TokenMatch match)
         {
-            TokenType = tokenType;
-            Value = value;
+            TokenType = match.TokenType;
+            Value = match.Value;
+            Match = match;
         }
 
-        public TokenType TokenType { get; set; }
-        public string Value { get; set; }
+        public TokenMatch Match { get; }
+        public TokenType TokenType { get;  }
+        public string Value { get; }
 
         public DslToken Clone()
         {
-            return new DslToken(TokenType, Value);
+            return new DslToken(Match);
         }
 
         public override string ToString()

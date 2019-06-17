@@ -1,36 +1,39 @@
-﻿using System;
+﻿using SW.Content.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content.Filters
 {
-    public class EqualToFilter : IContentFilter, IEquatable<EqualToFilter>
+    public class EqualToFilter : ContentFilterBase, IEquatable<EqualToFilter>
     {
-        public ContentPath Path { get; private set; }
+        public IContentExpression Left { get; private set; }
 
-        public IContentNode Value { get; private set; }
+        public IContentExpression Right { get; private set; }
 
-        public ContentFilterType Type => ContentFilterType.EqualTo;
+        public override ContentFilterType Type => ContentFilterType.EqualTo;
 
-        public EqualToFilter(ContentPath path, IContentNode value)
+        public EqualToFilter(IContentExpression left, IContentExpression right)
         {
-            Path = path ?? throw new ArgumentNullException(nameof(path));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Left = left ?? throw new ArgumentNullException(nameof(left));
+            Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-        public bool IsMatch(IContentNode value)
+        public override bool IsMatch(IContentNode value)
         {
-            if (!value.TryEvaluate(Path, out IContentNode left))
-            {
-                return false;
-            }
+            var leftIssue = Left.TryEvaluate(value, out IContentNode left);
+            if (leftIssue != null) return false;
 
-            return left.CompareWith(Value) == ComparisonResult.EqualTo;
+            var rightIssue = Right.TryEvaluate(value, out IContentNode right);
+            if (rightIssue != null) return false;
+            
+
+            return left.CompareWith(right) == ComparisonResult.EqualTo;
         }
 
         public override string ToString()
         {
-            return $"{Path} EQUALS {Value}";
+            return $"{Left} EQUALS {Right}";
         }
 
         public override bool Equals(object obj)
@@ -42,15 +45,15 @@ namespace SW.Content.Filters
         {
             return other != null &&
                     Type == other.Type &&
-                    Path.Equals(other.Path) &&
-                    Value.Equals(other.Value);
+                    Left.Equals(other.Left) &&
+                    Right.Equals(other.Right);
         }
 
         public override int GetHashCode()
         {
             var hashCode = 368036125;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ContentPath>.Default.GetHashCode(Path);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IContentNode>.Default.GetHashCode(Value);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Left);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Right);
             hashCode = hashCode * -1521134295 + Type.GetHashCode();
             return hashCode;
         }

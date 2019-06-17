@@ -1,30 +1,33 @@
-﻿using System;
+﻿using SW.Content.Expressions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace SW.Content.Filters
 {
-    public class ContainsWhereFilter : IContentFilter
+    public class ContainsWhereFilter : ContentFilterBase
     {
-        public ContentFilterType Type => ContentFilterType.ContainsWhere;
+        public override ContentFilterType Type => ContentFilterType.ContainsWhere;
         
-        public ContentPath ListPath { get; private set; }
+        public IContentExpression List { get; private set; }
 
         public IContentFilter ItemFilter { get; private set; }
 
-        public ContainsWhereFilter(ContentPath listPath, IContentFilter itemFilter)
+        public ContainsWhereFilter(IContentExpression list, IContentFilter item)
         {
-            ListPath = listPath ?? throw new ArgumentNullException(nameof(listPath));
-            ItemFilter = itemFilter ?? throw new ArgumentNullException(nameof(itemFilter));
+            List = list ?? throw new ArgumentNullException(nameof(list));
+            ItemFilter = item ?? throw new ArgumentNullException(nameof(item));
         }
 
-        public bool IsMatch(IContentNode document)
+        public override bool IsMatch(IContentNode document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
+
+            var leftIssue = List.TryEvaluate(document, out IContentNode left);
+            if (leftIssue != null) return false;
             
-            if (document.TryEvaluate(ListPath, out IContentNode node)
-                && node is ContentList list)
+            if (left is ContentList list)
             {
                 // evaluate filter against each child
                 return list.Items.Any(i => ItemFilter.IsMatch(i));
@@ -35,7 +38,7 @@ namespace SW.Content.Filters
 
         public override string ToString()
         {
-            return $"{ListPath} CONTAINS ({ItemFilter})";
+            return $"{List} CONTAINS ({ItemFilter})";
         }
     }
 }

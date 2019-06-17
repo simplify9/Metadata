@@ -7,11 +7,12 @@ namespace SW.Content.Schema
 {
     public class MustBeOneOf : IMust
     {
-        readonly IEnumerable<IMust> _options;
+        
+        public IEnumerable<IMust> Options { get; }
 
         public MustBeOneOf(IEnumerable<IMust> options)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            Options = options ?? throw new ArgumentNullException(nameof(options));
         }
 
         public IEnumerable<SchemaIssue> FindIssues(IContentNode node)
@@ -21,7 +22,7 @@ namespace SW.Content.Schema
                 throw new ArgumentNullException(nameof(node));
             }
             
-            foreach (var option in _options)
+            foreach (var option in Options)
             {
                 var issues = option.FindIssues(node);
                 if (!issues.Any())
@@ -31,7 +32,7 @@ namespace SW.Content.Schema
             }
 
             yield return new SchemaIssue(ContentPath.Root(), 
-                $"Value did not match any of the following: {string.Join(",", _options)}");
+                $"Value did not match any of the following: {string.Join(",", Options)}");
 
             yield break;
         }

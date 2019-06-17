@@ -12,6 +12,7 @@ namespace SW.Content
         Text,
         DateTime,
         List,
-        Object
+        Object,
+        Entity
     }
 }

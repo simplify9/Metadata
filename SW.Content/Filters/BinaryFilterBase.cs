@@ -4,13 +4,13 @@ using System.Text;
 
 namespace SW.Content.Filters
 {
-    public abstract class BinaryFilterBase : IContentFilter, IEquatable<BinaryFilterBase>
+    public abstract class BinaryFilterBase : ContentFilterBase, IEquatable<BinaryFilterBase>
     {
         public IContentFilter Left { get; private set; }
 
         public IContentFilter Right { get; private set; }
         
-        public ContentFilterType Type { get; }
+        public override ContentFilterType Type { get; }
 
         protected BinaryFilterBase(ContentFilterType type, IContentFilter left, IContentFilter right)
         {
@@ -19,7 +19,7 @@ namespace SW.Content.Filters
             Type = type;
         }
 
-        public abstract bool IsMatch(IContentNode document);
+        //public abstract bool IsMatch(IContentNode document);
 
         public override bool Equals(object obj)
         {

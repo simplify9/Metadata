@@ -63,11 +63,11 @@ namespace SW.Content.Expressions
             Elements = elements?.ToArray() ?? throw new ArgumentNullException(nameof(elements));
         }
 
-        public ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result)
+        public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
-            if (scope == null)
+            if (input == null)
             {
-                throw new ArgumentNullException(nameof(scope));
+                throw new ArgumentNullException(nameof(input));
             }
 
             result = null;
@@ -78,13 +78,13 @@ namespace SW.Content.Expressions
             {
                 if (e is Attribute a)
                 {
-                    var issue = a.Value.TryEvaluate(scope, out IContentNode attributeValue);
+                    var issue = a.Value.TryEvaluate(input, out IContentNode attributeValue);
                     if (issue != null) return issue;
                     attributeMap[a.Name] = attributeValue;
                 }
                 else if (e is Object o)
                 {
-                    var issue = o.SubObject.TryEvaluate(scope, out IContentNode objectValue);
+                    var issue = o.SubObject.TryEvaluate(input, out IContentNode objectValue);
                     
                     if (objectValue is ContentObject subObject)
                     {

@@ -19,8 +19,10 @@ namespace SW.Content.Serialization
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Null, "null", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.OpenBracket, "\\(", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.CloseBracket, "\\)", 1));
-            //_tokenDefinitions.Add(new TokenDefinition(TokenType.Identifier, "([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*", 3));
-            _tokenDefinitions.Add(new TokenDefinition(TokenType.Path, @"([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*(\.([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*)*", 2));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.Identifier, "([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*", 3));
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.Path, @"(\.([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*)+", 2));
+
+            //_tokenDefinitions.Add(new TokenDefinition(TokenType.Path, @"([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*(\.([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*)*", 2));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Contains, "contains", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.Equals, "equals|=", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.DateTime, ContentDateTime.Regex, 1));
@@ -36,7 +38,8 @@ namespace SW.Content.Serialization
             _tokenDefinitions.Add(new TokenDefinition(TokenType.CloseCurly, "\\}", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.OpenSquareBracket, "\\[", 1));
             _tokenDefinitions.Add(new TokenDefinition(TokenType.CloseSquareBracket, "\\]", 1));
-            
+            _tokenDefinitions.Add(new TokenDefinition(TokenType.DollarSign, "\\$", 1));
+
 
             //_tokenDefinitions.Add(new TokenDefinition(TokenType.Application, "app|application", 1));
             //_tokenDefinitions.Add(new TokenDefinition(TokenType.Between, "between", 1));
@@ -76,7 +79,7 @@ namespace SW.Content.Serialization
                 if (lastMatch != null && bestMatch.StartIndex < lastMatch.EndIndex)
                     continue;
 
-                yield return new DslToken(bestMatch.TokenType, bestMatch.Value);
+                yield return new DslToken(bestMatch);
 
                 lastMatch = bestMatch;
             }

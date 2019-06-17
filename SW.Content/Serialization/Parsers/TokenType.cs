@@ -6,6 +6,7 @@ namespace SW.Content.Serialization
 {
     public enum TokenType
     {
+        
         And,
         Or,
         Equals,
@@ -32,6 +33,7 @@ namespace SW.Content.Serialization
         CloseSquareBracket,
         DollarSign,
 
+        MatchRegex,
         Identifier
     }
 }

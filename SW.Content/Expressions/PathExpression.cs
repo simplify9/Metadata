@@ -10,15 +10,15 @@ namespace SW.Content.Expressions
 
         public ContentPath Path { get; private set; }
 
-        public PathExpression(ContentPath path, IContentExpression scope)
+        public PathExpression(IContentExpression scope, ContentPath path)
         {
             Path = path ?? throw new ArgumentNullException(nameof(path));
             Scope = scope ?? throw new ArgumentNullException(nameof(scope));
         }
 
-        public ExpressionIssue TryEvaluate(LexicalScope scope, out IContentNode result)
+        public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
-            return scope.TryEvaluate(Path, out result)
+            return input.TryEvaluate(Path, out result)
                 ? null
                 : new ExpressionIssue($"The expression '{Path}' was not in scope");
         }

@@ -10,7 +10,8 @@ namespace SW.Content.Schema
         
         public ContentProperty[] Properties { get;  }
 
-        public MustBeObject(IEnumerable<ContentProperty> properties)
+        public MustBeObject(IEnumerable<ContentProperty> properties, IEnumerable<ContentSchemaRule> rules)
+            : base(rules)
         {
             Properties = properties?.ToArray() ?? throw new ArgumentNullException(nameof(properties));
         }

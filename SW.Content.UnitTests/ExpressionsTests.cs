@@ -19,17 +19,17 @@ namespace SW.Content.UnitTests
         [TestMethod]
         public void Test_Expressions()
         {
-            var scope = new LexicalScope(new ContentObject(new Dictionary<string, object>
+            var scope = new ContentObject(new Dictionary<string, object>
             {
                 { "name", "John" }
-            }, ContentFactory.Default));
+            }, ContentFactory.Default);
 
             var e = new CreateObjectExpression(new List<CreateObjectExpression.Element>
             {
                 new CreateObjectExpression.Attribute
                 {
                     Name = "name",
-                    Value = new PathExpression(ContentPath.Parse("name"), new ScopeRootExpression())
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
                 },
 
                 new CreateObjectExpression.Attribute
