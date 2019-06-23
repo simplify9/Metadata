@@ -60,9 +60,10 @@ namespace SW.Content.Factories
 
                     case JTokenType.String:
                         var stringValue = jValue.Value<string>();
-                        return _dateTimeRegex.IsMatch(stringValue)
-                            ? new ContentDateTime(DateTime.Parse(stringValue, null, DateTimeStyles.RoundtripKind))
-                            : (IContentNode)new ContentText(stringValue);
+                        return new ContentText(stringValue);
+                        //return _dateTimeRegex.IsMatch(stringValue)
+                        //    ? new ContentDateTime(DateTime.Parse(stringValue, null, DateTimeStyles.RoundtripKind))
+                        //    : (IContentNode)new ContentText(stringValue);
                 }
             }
 
