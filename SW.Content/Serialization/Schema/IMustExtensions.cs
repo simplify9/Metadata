@@ -71,9 +71,11 @@ namespace SW.Content.Serialization.Schema
                         Rules = mustBeNumber.Rules.Select(r => r.ToDto()).ToArray(),
                     };
 
-                case MustHaveType<ContentDateTime> mustBeDateTime:
+                case MustBeDateTime mustBeDateTime:
                     return new DateTimeDto
                     {
+                        HasDate = mustBeDateTime.HasDate,
+                        HasTime = mustBeDateTime.HasTime,
                         Rules = mustBeDateTime.Rules.Select(r => r.ToDto()).ToArray(),
                     };
 
@@ -83,11 +85,11 @@ namespace SW.Content.Serialization.Schema
                         Rules = mustBeBool.Rules.Select(r => r.ToDto()).ToArray(),
                     };
 
-                case MustHaveType<ContentEntity> mustBeEntity:
+                case MustBeEntityWithName mustBeEntity:
                     return new EntityDto
                     {
                         Rules = mustBeEntity.Rules.Select(r => r.ToDto()).ToArray(),
-                        //Name = mustBeEntity.
+                        Name = mustBeEntity.EntityName
                     };
 
                 default:
