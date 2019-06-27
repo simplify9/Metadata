@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
+using SW.Content.Schema;
 
 namespace SW.Content.Factories
 {
-    public class FromJToken : IContentFactory
+    public class FromJToken : IContentFactory, IContentSchemaNodeFactory
     {
         static readonly IContentNode _null = new ContentNull();
 
@@ -61,14 +62,16 @@ namespace SW.Content.Factories
                     case JTokenType.String:
                         var stringValue = jValue.Value<string>();
                         return new ContentText(stringValue);
-                        //return _dateTimeRegex.IsMatch(stringValue)
-                        //    ? new ContentDateTime(DateTime.Parse(stringValue, null, DateTimeStyles.RoundtripKind))
-                        //    : (IContentNode)new ContentText(stringValue);
                 }
             }
 
             throw new InvalidOperationException("Unidentified JToken");
         }
-        
+
+        public IMust CreateSchemaNodeFrom(Type type)
+        {
+            if (type == typeof(JToken)) return new CanBeAnything();
+            return null;
+        }
     }
 }

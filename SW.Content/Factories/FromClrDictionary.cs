@@ -1,11 +1,12 @@
-﻿using SW.Content.Utils;
+﻿using SW.Content.Schema;
+using SW.Content.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrDictionary : IContentFactory
+    public class FromClrDictionary : IContentFactory, IContentSchemaNodeFactory
     {
         interface IProxy
         {
@@ -24,28 +25,47 @@ namespace SW.Content.Factories
             }
         }
 
-        public FromClrDictionary(IContentFactory memberFactory)
+        public FromClrDictionary(IContentFactory memberFactory, IContentSchemaNodeFactory schemaFactory)
         {
             _memberFactory = memberFactory;
+            _schemaFactory = schemaFactory;
         }
 
         readonly IContentFactory _memberFactory;
+        readonly IContentSchemaNodeFactory _schemaFactory;
+
+        bool Include(Type enumerableType)
+        {
+            if (enumerableType == null) return false;
+            if (!enumerableType.IsGenericType ||
+                !enumerableType.GetGenericTypeDefinition()
+                    .Equals(typeof(KeyValuePair<,>)) ||
+                    // only string keys
+                    !enumerableType.GetGenericArguments()[0].Equals(typeof(string)))
+            {
+                return false;
+            }
+            return true;
+        }
 
         public IContentNode CreateFrom(object obj)
         {
             var enumerableType = obj.GetType().GetEnumerableTypeArgument();
-            if (enumerableType == null) return null;
-            if (!enumerableType.IsGenericType ||
-                !enumerableType.GetGenericTypeDefinition()
-                    .Equals(typeof(KeyValuePair<,>)))
-            {
-                return null;
-            }
+            if (!Include(enumerableType)) return null;
 
             var proxyType = typeof(Proxy<,>).MakeGenericType(enumerableType.GetGenericArguments());
             var proxy = Activator.CreateInstance(proxyType) as IProxy;
             var e = proxy.Cast(obj);
             return new ContentObject(e, _memberFactory);
+        }
+
+        public IMust CreateSchemaNodeFrom(Type type)
+        {
+            var enumerableType = type.GetEnumerableTypeArgument();
+            if (!Include(enumerableType)) return null;
+            return new MustBeObject(
+                _schemaFactory.CreateSchemaNodeFrom(enumerableType.GetGenericArguments()[1]), 
+                new ContentSchemaRule[] { });
         }
     }
 }

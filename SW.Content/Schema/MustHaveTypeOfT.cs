@@ -7,6 +7,7 @@ namespace SW.Content.Schema
     public class MustHaveType<TContent> : IMust
         where TContent : IContentNode
     {
+       
         public IEnumerable<ContentSchemaRule> Rules { get; }
 
         public MustHaveType(IEnumerable<ContentSchemaRule> rules)
