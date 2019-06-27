@@ -1,4 +1,5 @@
 ﻿using SW.Content.Factories;
+using SW.Content.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,11 @@ namespace SW.Content
 {
     public static class ContentFactory
     {
-        class DefaultContentFactory : IContentFactory
+        class DefaultFactory : IContentFactory
         {
             readonly IContentFactory[] _factories;
-
-            public DefaultContentFactory()
+            
+            public DefaultFactory()
             {
                 _factories = new IContentFactory[]
                     {
@@ -24,11 +25,11 @@ namespace SW.Content
                         new FromClrBoolean(),
                         new FromClrDateTime(),
                         new FromClrNumberType(),
-                        new FromClrDictionary(this),
-                        new FromClrEnumerable(this),
-                        new FromClrPoco(this)
+                        new FromClrDictionary(this, ContentSchemaNodeFactory.Default),
+                        new FromClrEnumerable(this, ContentSchemaNodeFactory.Default),
+                        new FromClrPoco(this, ContentSchemaNodeFactory.Default)
                     };
-
+                
             }
 
             public IContentNode CreateFrom(object from)
@@ -41,8 +42,10 @@ namespace SW.Content
 
                 throw new NotSupportedException($"Cannot create a content node from type '{from?.GetType().AssemblyQualifiedName}'");
             }
+
+            
         }
 
-        public static IContentFactory Default { get; } = new DefaultContentFactory();
+        public static IContentFactory Default { get; } = new DefaultFactory();
     }
 }

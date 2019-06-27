@@ -13,23 +13,42 @@ namespace SW.Content.UnitTests
     [TestClass]
     public class SchemaTests
     {
+        static readonly ContentSchemaRule[] _noRules = new ContentSchemaRule[] { };
+
+        [TestMethod]
+        public void Test_TypeToSchema()
+        {
+            var f = ContentSchemaNodeFactory.Default;
+            var schema = f.CreateSchemaNodeFrom(typeof(Employee));
+
+            Assert.IsInstanceOfType(schema, typeof(MustBeObject));
+
+            var objSchema = schema as MustBeObject;
+
+            var emp = ContentFactory.Default.CreateFrom(Employee.Sample);
+
+            var issues = objSchema.FindIssues(emp).ToArray();
+
+            Assert.AreEqual(0, issues.Length);
+        }
+
         [TestMethod]
         public void Test_Validation()
         {
-            var noRules = new ContentSchemaRule[] { };
+             
             var employeeSchema = new ContentSchema(new MustBeObject(
                 new ContentProperty[]
                 {
-                    new ContentProperty("Id", new MustHaveType<ContentNumber>(noRules), true),
-                    new ContentProperty("Name", new MustHaveType<ContentText>(noRules), true),
+                    new ContentProperty("Id", new MustHaveType<ContentNumber>(_noRules), true),
+                    new ContentProperty("Name", new MustHaveType<ContentText>(_noRules), true),
                     new ContentProperty("Phones", new MustBeList(
-                        new MustHaveType<ContentText>(noRules), 1, 3, noRules), false),
+                        new MustHaveType<ContentText>(_noRules), 1, 3, _noRules), false),
                     new ContentProperty("Salary", new MustBeObject(new ContentProperty[]
                     {
-                        new ContentProperty("Amount", new MustHaveType<ContentNumber>(noRules), true),
+                        new ContentProperty("Amount", new MustHaveType<ContentNumber>(_noRules), true),
                         new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter(new ScopeRootExpression(), "^[A-Z]{3,3}$")) }), true)
-                    }, noRules), true)
-                }, noRules));
+                    }, _noRules), true)
+                }, _noRules));
 
             var issues = employeeSchema
                 .FindIssues(ContentFactory.Default.CreateFrom(Employee.Sample))
@@ -51,7 +70,7 @@ namespace SW.Content.UnitTests
 
             var dto = employeeSchema.Root.ToDto();
 
-            // object(id*:wholenumber[1:3],name:text,phones:list[1:3](text)
+            
         }
     }
 }
