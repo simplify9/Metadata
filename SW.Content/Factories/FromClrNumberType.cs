@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrNumberType : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrNumberType : IContentNodeFactory, IContentSchemaNodeFactory
     {
         static readonly Type[] _numberTypes =
             {

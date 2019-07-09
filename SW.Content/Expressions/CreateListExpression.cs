@@ -75,7 +75,7 @@ namespace SW.Content.Expressions
                 {
                     if (item is ContentList subList)
                     {
-                        list.AddRange(subList.Items);
+                        list.AddRange(subList);
                     }
                     else if (item is ContentNull)
                     {
@@ -90,11 +90,11 @@ namespace SW.Content.Expressions
 
                 if (item is ContentList listItem)
                 {
-                    list.AddRange(listItem.Items);
+                    list.AddRange(listItem);
                 }
                 else list.Add(item);
             }
-            result = new ContentList(list, ContentFactory.Default);
+            result = new ContentList(list, list, ContentFactory.Default);
 
             return null;
         }

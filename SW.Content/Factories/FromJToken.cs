@@ -6,19 +6,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using SW.Content.Schema;
+using SW.Content.Utils;
 
 namespace SW.Content.Factories
 {
-    public class FromJToken : IContentFactory, IContentSchemaNodeFactory
+    public class FromJToken : IContentNodeFactory, IContentSchemaNodeFactory
     {
-        static readonly IContentNode _null = new ContentNull();
+        
 
         static readonly Regex _dateTimeRegex = 
             new Regex($"^{ContentDateTime.Regex}$", RegexOptions.Compiled);
 
-        readonly IContentFactory _contentFactory;
+        readonly IContentNodeFactory _contentFactory;
 
-        public FromJToken(IContentFactory contentFactory)
+        public FromJToken(IContentNodeFactory contentFactory)
         {
             _contentFactory = contentFactory;
         }
@@ -29,7 +30,7 @@ namespace SW.Content.Factories
 
             if (!(obj is JToken token)) return null;
             
-            if (token.Type == JTokenType.Null) return new ContentNull();
+            if (token.Type == JTokenType.Null) return ContentNull.Singleton;
             
             if (token is JObject jObject)
             {
@@ -37,12 +38,13 @@ namespace SW.Content.Factories
                 return new ContentObject(props
                     .Select(pair => 
                         new KeyValuePair<string, object>(pair.Key, pair.Value)),
+                        obj,
                         _contentFactory);
             }
 
             if (token is JArray jArray)
             {
-                return new ContentList(jArray, _contentFactory);
+                return new ContentList(jArray, jArray, _contentFactory);
             }
 
             if (token is JValue jValue)

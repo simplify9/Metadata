@@ -6,7 +6,7 @@ using SW.Content.Utils;
 
 namespace SW.Content.Factories
 {
-    public class FromClrEnum : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrEnum : IContentNodeFactory, IContentSchemaNodeFactory
     {
         string GetEntityName(Type t)
         {

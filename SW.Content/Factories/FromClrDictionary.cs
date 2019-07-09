@@ -2,11 +2,12 @@
 using SW.Content.Utils;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrDictionary : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrDictionary : IContentNodeFactory, IContentSchemaNodeFactory
     {
         interface IProxy
         {
@@ -25,13 +26,13 @@ namespace SW.Content.Factories
             }
         }
 
-        public FromClrDictionary(IContentFactory memberFactory, IContentSchemaNodeFactory schemaFactory)
+        public FromClrDictionary(IContentNodeFactory memberFactory, IContentSchemaNodeFactory schemaFactory)
         {
             _memberFactory = memberFactory;
             _schemaFactory = schemaFactory;
         }
 
-        readonly IContentFactory _memberFactory;
+        readonly IContentNodeFactory _memberFactory;
         readonly IContentSchemaNodeFactory _schemaFactory;
 
         bool Include(Type enumerableType)
@@ -55,8 +56,10 @@ namespace SW.Content.Factories
 
             var proxyType = typeof(Proxy<,>).MakeGenericType(enumerableType.GetGenericArguments());
             var proxy = Activator.CreateInstance(proxyType) as IProxy;
+
+
             var e = proxy.Cast(obj);
-            return new ContentObject(e, _memberFactory);
+            return new ContentObject(e, obj, _memberFactory);
         }
 
         public IMust CreateSchemaNodeFrom(Type type)

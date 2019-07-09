@@ -90,7 +90,7 @@ namespace SW.Content.Expressions
                     {
                         foreach (var key in subObject.Keys)
                         {
-                            subObject.TryEvaluate(ContentPath.Parse(key), out IContentNode value);
+                            subObject.TryEvaluate(ContentPath.Root.Append(key), out IContentNode value);
                             attributeMap[key] = subObject;
                         }
                     }
@@ -105,7 +105,7 @@ namespace SW.Content.Expressions
                 }
             }
 
-            result = new ContentObject(attributeMap, ContentFactory.Default);
+            result = new ContentObject(attributeMap, attributeMap, ContentFactory.Default);
 
             return null;
         }

@@ -1,11 +1,12 @@
 ﻿using SW.Content.Schema;
+using SW.Content.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrDateTime : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrDateTime : IContentNodeFactory, IContentSchemaNodeFactory
     {
         
         public IContentNode CreateFrom(object obj)

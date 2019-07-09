@@ -27,7 +27,7 @@ namespace SW.Content.UnitTests
                 new CreateObjectExpression.Attribute
                 {
                     Name = "subName",
-                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.name"))
                 },
 
                 new CreateObjectExpression.Attribute
@@ -42,7 +42,7 @@ namespace SW.Content.UnitTests
                 new CreateObjectExpression.Attribute
                 {
                     Name = "name",
-                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.name"))
                 },
 
                 new CreateObjectExpression.Attribute

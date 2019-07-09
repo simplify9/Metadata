@@ -9,7 +9,9 @@ namespace SW.Content
     {
         static readonly string KEY = "_#%$";
 
-        public ContentNull()
+        public static readonly ContentNull Singleton = new ContentNull();
+
+        ContentNull()
         {
 
         }
@@ -56,5 +58,6 @@ namespace SW.Content
         {
             return KEY.GetHashCode();
         }
+        
     }
 }

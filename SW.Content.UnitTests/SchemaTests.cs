@@ -36,7 +36,7 @@ namespace SW.Content.UnitTests
         public void Test_Validation()
         {
              
-            var employeeSchema = new ContentSchema(new MustBeObject(
+            var employeeSchema = new MustBeObject(
                 new ContentProperty[]
                 {
                     new ContentProperty("Id", new MustHaveType<ContentNumber>(_noRules), true),
@@ -48,7 +48,7 @@ namespace SW.Content.UnitTests
                         new ContentProperty("Amount", new MustHaveType<ContentNumber>(_noRules), true),
                         new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter(new ScopeRootExpression(), "^[A-Z]{3,3}$")) }), true)
                     }, _noRules), true)
-                }, _noRules));
+                }, _noRules);
 
             var issues = employeeSchema
                 .FindIssues(ContentFactory.Default.CreateFrom(Employee.Sample))
@@ -65,10 +65,10 @@ namespace SW.Content.UnitTests
 
             Assert.AreEqual(1, issues.Length);
 
-            var expectedSubject = new ContentPath(new[] { nameof(Employee.Salary), nameof(Money.Currency) });
+            var expectedSubject = ContentPath.Root.Append(nameof(Employee.Salary)).Append(nameof(Money.Currency));
             Assert.AreEqual(expectedSubject, issues[0].SubjectPath);
 
-            var dto = employeeSchema.Root.ToDto();
+            var dto = employeeSchema.ToDto();
 
             
         }

@@ -17,6 +17,8 @@ namespace SW.Content
             _value = value;
         }
         
+
+
         public virtual ComparisonResult CompareWith(IContentNode other)
         {
             if (other == null)
@@ -71,7 +73,6 @@ namespace SW.Content
             return -1939223833 + EqualityComparer<TValue>.Default.GetHashCode(_value);
         }
         
-
         public static bool operator ==(ContentPrimitive<TValue> base1, ContentPrimitive<TValue> base2)
         {
             return EqualityComparer<ContentPrimitive<TValue>>.Default.Equals(base1, base2);

@@ -1,10 +1,11 @@
-﻿using System;
+﻿using SW.Content.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content
 {
-    public interface IContentFactory
+    public interface IContentNodeFactory
     {
         IContentNode CreateFrom(object from);
     }

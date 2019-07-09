@@ -40,7 +40,7 @@ namespace SW.Content.Schema
                 {
                     foreach (var prop in Properties)
                     {
-                        var path = new ContentPath(new string[] { prop.Key });
+                        var path = ContentPath.Root.Append(prop.Key);
 
                         var exists = node.TryEvaluate(path, out IContentNode result);
 
@@ -66,7 +66,7 @@ namespace SW.Content.Schema
                     {
                         foreach (var key in objectNode.Keys)
                         {
-                            var path = ContentPath.Parse(key);
+                            var path = ContentPath.Root.Append(key);
                             node.TryEvaluate(path, out IContentNode result);
                             
                             var fieldIssues = ItemType.FindIssues(result);

@@ -30,7 +30,7 @@ namespace SW.Content.Serialization
                 case TokenType.DateTime: return new ContentDateTime(DateTime.Parse(token.Value, null, DateTimeStyles.RoundtripKind));
                 case TokenType.String: return new ContentText(token.Value.Substring(1, token.Value.Length - 2));
                 case TokenType.Number: return new ContentNumber(decimal.Parse(token.Value));
-                case TokenType.Null: return new ContentNull();
+                case TokenType.Null: return ContentNull.Singleton;
                 case TokenType.TrueLiteral: return new ContentBoolean(true);
                 case TokenType.FalseLiteral: return new ContentBoolean(false);
                 default: throw new ParserException($"Unexpected token", token);

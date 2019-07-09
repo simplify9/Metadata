@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using SW.Content.Schema;
+using SW.Content.Utils;
 
 namespace SW.Content.Factories
 {
-    public class FromClrBoolean : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrBoolean : IContentNodeFactory, IContentSchemaNodeFactory
     {
      
         
