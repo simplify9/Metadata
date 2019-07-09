@@ -1,26 +1,32 @@
-﻿using System;
+﻿using SW.Content.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace SW.Content
 {
-    public class ContentList : IContentNode
+    public class ContentList : IContentNode, IEnumerable<IContentNode>, IRawValueWrapper
     {
-        readonly IEnumerable<object> _values;
-        readonly IContentFactory _contentFactory;
+        readonly IContentNodeFactory _contentFactory;
+        readonly object _rawValue;
 
-        public ContentList(IEnumerable<object> values, IContentFactory contentFactory)
+        object IRawValueWrapper.RawValue => _rawValue;
+
+        IEnumerable DataSource { get; }
+
+        public ContentList(IEnumerable dataSource, object rawValue, IContentNodeFactory contentFactory)
         {
-            _values = values ?? throw new ArgumentNullException(nameof(values));
+            DataSource = dataSource ?? throw new ArgumentNullException(nameof(rawValue));
+            _rawValue = rawValue ?? throw new ArgumentNullException(nameof(rawValue));
             _contentFactory = contentFactory ?? throw new ArgumentNullException(nameof(contentFactory));
         }
-
-        public IEnumerable<IContentNode> Items => 
-            _values.Select(_contentFactory.CreateFrom);
-
+        
         public ComparisonResult CompareWith(IContentNode other)
         {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+            
             return ComparisonResult.NotEqualTo;
         }
         
@@ -29,13 +35,26 @@ namespace SW.Content
             if (path == null) throw new ArgumentNullException(nameof(path));
 
             result = null;
-            if (!path.Nodes.Any())
+            if (path == ContentPath.Root)
             {
                 result = this;
                 return true;
             }
 
             return false;
+        }
+
+        public IEnumerator<IContentNode> GetEnumerator()
+        {
+            foreach (var item in DataSource)
+            {
+                yield return _contentFactory.CreateFrom(item);
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
     }
 }

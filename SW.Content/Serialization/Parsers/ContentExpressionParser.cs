@@ -213,7 +213,7 @@ namespace SW.Content.Serialization
                 {
                     if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(TokenType.Path);
-                    exp = new PathExpression(exp, ContentPath.Parse(token.Value.TrimStart('.')));
+                    exp = new PathExpression(exp, ContentPath.Parse($"$.{token.Value.TrimStart('.')}"));
                 }
 
                 else if (lookAhead.TokenType == TokenType.DollarSign)

@@ -33,8 +33,7 @@ namespace SW.Content.Filters
 
             if (left is ContentList list)
             {
-                return list.Items
-                    .Any(i => i.CompareWith(right) == ComparisonResult.EqualTo);
+                return list.Any(i => i.CompareWith(right) == ComparisonResult.EqualTo);
             }
 
             return false;

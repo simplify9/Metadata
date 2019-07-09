@@ -20,7 +20,7 @@ namespace SW.Content.Schema
             if (node == null) throw new ArgumentNullException(nameof(node));
             if (!(node is TContent))
             {
-                yield return new SchemaIssue(ContentPath.Root(),
+                yield return new SchemaIssue(ContentPath.Root,
                     $"Expected type {typeof(TContent)}, found {node.GetType()}");
             }
             else
@@ -31,7 +31,7 @@ namespace SW.Content.Schema
                     if (!r.Filter.IsMatch(node))
                     {
                         yield return new SchemaIssue(
-                            ContentPath.Root(),
+                            ContentPath.Root,
                             $"Rule named '{r.Name}' did not match content node");
                     }
                 }

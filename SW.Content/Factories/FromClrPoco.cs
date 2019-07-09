@@ -4,15 +4,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using SW.Content.Schema;
+using SW.Content.Utils;
 
 namespace SW.Content.Factories
 {
-    public class FromClrPoco : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrPoco : IContentNodeFactory, IContentSchemaNodeFactory
     {
-        readonly IContentFactory _memberFactory;
+        readonly IContentNodeFactory _memberFactory;
         readonly IContentSchemaNodeFactory _schemaFactory;
 
-        public FromClrPoco(IContentFactory memberFactory, IContentSchemaNodeFactory schemaFactory)
+        public FromClrPoco(IContentNodeFactory memberFactory, IContentSchemaNodeFactory schemaFactory)
         {
             _memberFactory = memberFactory;
             _schemaFactory = schemaFactory;
@@ -21,11 +22,11 @@ namespace SW.Content.Factories
         public IContentNode CreateFrom(object obj)
         {
             var t = obj.GetType();
-            var keyValuePairs = t.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Select(p =>
-                    new KeyValuePair<string, object>(p.Name, p.GetValue(obj)));
+            var keyValuePairs = t
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Select(p => new KeyValuePair<string, object>(p.Name, p.GetValue(obj)));
 
-            return new ContentObject(keyValuePairs, _memberFactory);
+            return new ContentObject(keyValuePairs, obj, _memberFactory);
         }
 
         public IMust CreateSchemaNodeFrom(Type type)

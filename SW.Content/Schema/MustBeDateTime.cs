@@ -40,7 +40,7 @@ namespace SW.Content.Schema
 
                 if (!regex.IsMatch(text.Value))
                 {
-                    yield return new SchemaIssue(ContentPath.Root(), $"Value '{text.Value}' is not a valid date, time or date time");
+                    yield return new SchemaIssue(ContentPath.Root, $"Value '{text.Value}' is not a valid date, time or date time");
                 }
             }
             else

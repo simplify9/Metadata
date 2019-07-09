@@ -36,7 +36,7 @@ namespace SW.Content.Schema
 
                 
 
-                var itemCount = list.Items.Count();
+                var itemCount = list.Count();
                 if ((MinItemCount != null && MinItemCount.Value > itemCount) ||
                     (MaxItemCount != null && MaxItemCount.Value < itemCount))
                 {
@@ -62,9 +62,9 @@ namespace SW.Content.Schema
                 else
                 {
                     var idx = 0;
-                    foreach (var item in list.Items)
+                    foreach (var item in list)
                     {
-                        var index = new ContentPath(new string[] { $"[{idx}]" });
+                        var index = ContentPath.Root.Append(idx);
                         issues = Item.FindIssues(item);
                         foreach (var issue in issues)
                         {

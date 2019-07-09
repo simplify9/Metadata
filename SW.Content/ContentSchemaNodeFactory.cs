@@ -28,7 +28,7 @@ namespace SW.Content
                         new FromClrDateTime(),
                         new FromClrNumberType(),
                         new FromClrDictionary(ContentFactory.Default, this),
-                        new FromClrEnumerable(ContentFactory.Default, this),
+                        new FromClrIEnumerable(ContentFactory.Default, this),
                         new FromClrPoco(ContentFactory.Default, this)
                     };
             }

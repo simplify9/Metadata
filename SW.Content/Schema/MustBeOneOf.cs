@@ -31,7 +31,7 @@ namespace SW.Content.Schema
                 }
             }
 
-            yield return new SchemaIssue(ContentPath.Root(), 
+            yield return new SchemaIssue(ContentPath.Root, 
                 $"Value did not match any of the following: {string.Join(",", Options)}");
 
             yield break;

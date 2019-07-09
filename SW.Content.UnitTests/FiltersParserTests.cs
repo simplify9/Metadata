@@ -18,10 +18,10 @@ namespace SW.Content.UnitTests
         {
             var left = new AndFilter(
                 new EqualToFilter(
-                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("Name")),
+                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.Name")),
                     new ConstantExpression(new ContentText("Ahmad contains"))),
                 new ContainsFilter(
-                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("Friends")),
+                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.Friends")),
                     new ConstantExpression(new ContentText("Sameer"))));
             var issues = _parser.TryParse("$.Name EQUALS \"Ahmad contains\" AND $.Friends CONTAINS \"Sameer\"", out IContentExpression actual);
             
@@ -30,10 +30,10 @@ namespace SW.Content.UnitTests
 
             var right = new AndFilter(
                 new EqualToFilter(
-                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("Name")),
+                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.Name")),
                     new ConstantExpression(new ContentText("Suzi 34"))),
                 new ContainsFilter(
-                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("Friends")),
+                    new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.Friends")),
                     new ConstantExpression(new ContentText("Sameer"))));
 
             issues = _parser.TryParse(

@@ -1,12 +1,13 @@
 ﻿using SW.Content.Schema;
 using SW.Content.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrEnumerable : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrIEnumerable : IContentNodeFactory, IContentSchemaNodeFactory
     {
         interface IProxy
         {
@@ -22,10 +23,10 @@ namespace SW.Content.Factories
             }
         }
 
-        readonly IContentFactory _itemFactory;
+        readonly IContentNodeFactory _itemFactory;
         readonly IContentSchemaNodeFactory _schemaFactory;
 
-        public FromClrEnumerable(IContentFactory itemFactory, IContentSchemaNodeFactory schemaFactory)
+        public FromClrIEnumerable(IContentNodeFactory itemFactory, IContentSchemaNodeFactory schemaFactory)
         {
             _itemFactory = itemFactory;
             _schemaFactory = schemaFactory;
@@ -33,14 +34,21 @@ namespace SW.Content.Factories
 
         public IContentNode CreateFrom(object obj)
         {
-            var enumerableType = obj.GetType().GetEnumerableTypeArgument();
-            if (enumerableType == null) return null;
+            if (obj is IEnumerable enumerable)
+            {
+                return new ContentList(enumerable, enumerable, _itemFactory);
+            }
 
+            return null;
+
+            //var enumerableType = obj.GetType().GetEnumerableTypeArgument();
+            //if (enumerableType == null) return null;
+            
             //var args = enumerableType.GetGenericArguments();
-            var proxyType = typeof(Proxy<>).MakeGenericType(enumerableType);
-            var proxy = Activator.CreateInstance(proxyType) as IProxy;
-            var e = proxy.Cast(obj);
-            return new ContentList(e, _itemFactory);
+            //var proxyType = typeof(Proxy<>).MakeGenericType(enumerableType);
+            //var proxy = Activator.CreateInstance(proxyType) as IProxy;
+            //var e = proxy.Cast(obj);
+            //return new ContentList(e, _itemFactory);
         }
 
         public IMust CreateSchemaNodeFrom(Type type)

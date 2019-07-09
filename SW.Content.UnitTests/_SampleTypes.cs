@@ -24,6 +24,31 @@ namespace SW.Content.UnitTests
         public string Currency { get; set; }
     }
 
+    public class TypeWithPrivateSetters
+    {
+        public int Prop1 { get; private set; }
+    }
+
+    
+
+    public class Sub1
+    {
+        public int Prop1 { get; set; }
+
+        public TypeWithCycles Parent { get; set; }
+
+        public Sub1 SubChild { get; set; }
+    }
+
+    public class TypeWithCycles
+    {
+        public TypeWithCycles Self { get; set; }
+
+        public int MyProperty { get; set; }
+
+        public Sub1 Child { get; set; }
+    }
+
     public class Employee
     {
         public static Employee Sample = new Employee

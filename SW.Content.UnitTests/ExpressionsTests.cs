@@ -19,17 +19,19 @@ namespace SW.Content.UnitTests
         [TestMethod]
         public void Test_Expressions()
         {
-            var scope = new ContentObject(new Dictionary<string, object>
+            var d = new Dictionary<string, object>
             {
                 { "name", "John" }
-            }, ContentFactory.Default);
+            };
+
+            var scope = new ContentObject(d, d, ContentFactory.Default);
 
             var e = new CreateObjectExpression(new List<CreateObjectExpression.Element>
             {
                 new CreateObjectExpression.Attribute
                 {
                     Name = "name",
-                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("name"))
+                    Value = new PathExpression(new ScopeRootExpression(), ContentPath.Parse("$.name"))
                 },
 
                 new CreateObjectExpression.Attribute

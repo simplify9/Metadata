@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SW.Content.Utils;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -6,21 +8,34 @@ using System.Text;
 
 namespace SW.Content
 {
-    public class ContentObject : IContentNode
+    public class ContentObject : IContentNode, IRawValueWrapper, IEnumerable<ContentPathValue>
     {
-        readonly Dictionary<string, object> _keyValues;
-        readonly IContentFactory _contentFactory;
-        
-        public IEnumerable<string> Keys { get { return _keyValues.Keys; } }
+        readonly IContentNodeFactory _contentFactory;
 
-        public ContentObject(IEnumerable<KeyValuePair<string, object>> keyValues, IContentFactory contentFactory)
+        IEnumerable<KeyValuePair<string, object>> DataSource { get; }
+
+        readonly object _rawValue;
+
+        object IRawValueWrapper.RawValue => _rawValue;
+
+        public IEnumerable<string> Keys => DataSource.Select(pair => pair.Key);
+
+        public ContentObject(IEnumerable<KeyValuePair<string,object>> dataSource, object rawData,  IContentNodeFactory contentFactory)
         {
-            if (keyValues == null) throw new ArgumentNullException(nameof(keyValues));
+            DataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+            _rawValue = rawData;
             _contentFactory = contentFactory ?? throw new ArgumentNullException(nameof(contentFactory));
-            _keyValues = keyValues.ToDictionary(i => i.Key, i => i.Value);
             
         }
-        
+
+        //public ContentObject(IEnumerable<KeyValuePair<string, object>> keyValues, IContentNodeFactory contentFactory)
+        //{
+        //    if (keyValues == null) throw new ArgumentNullException(nameof(keyValues));
+        //    _contentFactory = contentFactory ?? throw new ArgumentNullException(nameof(contentFactory));
+        //    _keyValues = keyValues.ToDictionary(i => i.Key, i => i.Value);
+
+        //}
+
         public ComparisonResult CompareWith(IContentNode other)
         {
             return ComparisonResult.NotEqualTo;
@@ -32,23 +47,40 @@ namespace SW.Content
             
             result = null;
 
-            if (!path.Nodes.Any())
+            if (path == ContentPath.Root)
             {
                 result = this;
                 return true;
             }
-            
-            var keyExists = _keyValues.TryGetValue(path.Nodes.First(), out object rawResult);
-            if (keyExists)
+
+            var first = path.Nodes.First();
+            var rawResult = DataSource.Where(pair => pair.Key == first);
+
+            if (rawResult.Any())
             {
                 path = path.Sub(1);
+
                 return _contentFactory
-                    .CreateFrom(rawResult)
+                    .CreateFrom(rawResult.First().Value)
                     .TryEvaluate(path, out result);
             }
 
             return false;
         }
-        
+
+        public IEnumerator<ContentPathValue> GetEnumerator()
+        {
+            foreach (var pair in DataSource)
+            {
+                yield return new ContentPathValue(ContentPath.Root.Append(pair.Key), 
+                    _contentFactory.CreateFrom(pair.Value));
+            }
+            
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
     }
 }

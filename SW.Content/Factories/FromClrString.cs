@@ -1,11 +1,12 @@
 ﻿using SW.Content.Schema;
+using SW.Content.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace SW.Content.Factories
 {
-    public class FromClrString : IContentFactory, IContentSchemaNodeFactory
+    public class FromClrString : IContentNodeFactory, IContentSchemaNodeFactory
     {
         public IContentNode CreateFrom(object obj)
         {

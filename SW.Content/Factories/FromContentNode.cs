@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using SW.Content.Schema;
+using SW.Content.Utils;
 
 namespace SW.Content.Factories
 {
-    class FromContentNode : IContentFactory, IContentSchemaNodeFactory
+    class FromContentNode : IContentNodeFactory, IContentSchemaNodeFactory
     {
         public IContentNode CreateFrom(object obj)
         {

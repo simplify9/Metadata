@@ -17,14 +17,14 @@ namespace SW.Content
 
                 case ContentList list:
                     var jArray = new JArray();
-                    foreach (var i in list.Items) jArray.Add(i.ToJson());
+                    foreach (var i in list) jArray.Add(i.ToJson());
                     return jArray;
 
                 case ContentObject obj:
                     var jObject = new JObject();
                     foreach (var a in obj.Keys)
                     {
-                        obj.TryEvaluate(ContentPath.Parse(a), out IContentNode result);
+                        obj.TryEvaluate(ContentPath.Root.Append(a), out IContentNode result);
                         jObject.Add(a, result.ToJson());
                     }
                     return jObject;

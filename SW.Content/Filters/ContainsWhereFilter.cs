@@ -30,7 +30,7 @@ namespace SW.Content.Filters
             if (left is ContentList list)
             {
                 // evaluate filter against each child
-                return list.Items.Any(i => ItemFilter.IsMatch(i));
+                return list.Any(i => ItemFilter.IsMatch(i));
             }
             
             return false;
