@@ -15,10 +15,15 @@ namespace SW.Content.Utils
         
         public static readonly ListNode<T> Empty = new ListNode<T>();
 
-        public ListNode(ListNode<T> parent, T value)
+        ListNode(ListNode<T> parent, T value)
         {
-            _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+            _parent = parent;
             _value = value;
+        }
+
+        public ListNode<T> Append(T value)
+        {
+            return new ListNode<T>(this, value);
         }
 
         public bool Contains(T o)

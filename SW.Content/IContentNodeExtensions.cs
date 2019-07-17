@@ -14,7 +14,7 @@ namespace SW.Content
 
             if (n is IRawValueWrapper wrapper)
             {
-                branch = new ListNode<object>(branch, wrapper.RawValue);
+                branch = branch.Append(wrapper.RawValue);
             }
             
             if (n is ContentObject o)
