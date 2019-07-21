@@ -37,5 +37,13 @@ namespace SW.Content.Schema
                 }
             }
         }
+
+        public virtual bool TryGetSchema(ContentPath path, out IMust schema)
+        {
+            schema = null;
+            if (path.Length > 0) return false;
+            schema = this;
+            return true;
+        }
     }
 }
