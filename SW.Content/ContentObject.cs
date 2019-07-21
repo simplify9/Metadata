@@ -53,8 +53,8 @@ namespace SW.Content
                 return true;
             }
 
-            var first = path.Nodes.First();
-            var rawResult = DataSource.Where(pair => pair.Key == first);
+            var first = path.First();
+            var rawResult = DataSource.Where(pair => pair.Key == first.ToString());
 
             if (rawResult.Any())
             {

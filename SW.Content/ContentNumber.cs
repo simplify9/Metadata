@@ -15,7 +15,8 @@ namespace SW.Content
         
         public override string CreateMatchKey()
         {
-            return _value.ToString("n6");
+            var str = Value.ToString("n6");
+            return $"{str.IndexOf('.').ToString("00")}{str}";
         }
         
     }

@@ -34,7 +34,7 @@ namespace SW.Content
                     foreach (var pair in objPairs)
                     {
                         obj.TryEvaluate(pair.Path, out IContentNode result);
-                        jObject.Add(pair.Path.Nodes.Last(), result.CreateJToken(branch));
+                        jObject.Add(pair.Path.Last().ToString(), result.CreateJToken(branch));
                     }
                     return jObject;
 

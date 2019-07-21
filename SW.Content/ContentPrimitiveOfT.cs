@@ -42,7 +42,7 @@ namespace SW.Content
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
             
-            if (!path.Nodes.Any())
+            if (!path.Any())
             {
                 result = this;
                 return true;

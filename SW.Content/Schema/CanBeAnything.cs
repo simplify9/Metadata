@@ -10,5 +10,11 @@ namespace SW.Content.Schema
         {
             yield break;
         }
+
+        public bool TryGetSchema(ContentPath path, out IMust schema)
+        {
+            schema = new CanBeAnything();
+            return true;
+        }
     }
 }
