@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SW.Content;
 using SW.Content.Schema;
@@ -14,6 +15,9 @@ namespace SW.Content.Search.EF
 {
     public class SearchQueryHandler<TDoc> : ISearchQueryHandler
     {
+
+        
+
         class DocSortValue
         {
             public DbDoc Doc { get; set; }
@@ -208,11 +212,9 @@ namespace SW.Content.Search.EF
             q = BuildSortBy(query, q);
             var count = await q.CountAsync();
             var matches = await q.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
-
-            // format result
-
+            
             return new SearchQueryResult(matches
-                .Select(m => JToken.FromObject(m.Doc.BodyData)).ToArray(), 
+                .Select(m => JsonUtil.Deserialize(m.Doc.BodyData)).ToArray(), 
                 count);
         }
     }
