@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SW.Content.Search.EF\SW.Content.Search.EF.csproj" />
     <ProjectReference Include="..\SW.Content\SW.Content.csproj" />
   </ItemGroup>
 
