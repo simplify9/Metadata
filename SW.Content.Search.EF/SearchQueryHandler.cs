@@ -22,6 +22,7 @@ namespace SW.Content.Search.EF
         }
 
         static readonly MethodInfo _anyMethod;
+
         static SearchQueryHandler()
         {
             //Create Generic Any Method
@@ -92,15 +93,13 @@ namespace SW.Content.Search.EF
             
         //}
         
-        Expression BuildCriteriaExpr(SearchQuery query, SearchQuery.Line line)
+        Expression BuildCriteriaExpr(SearchQuery.Line line)
         {
             var valueType = ((IContentNode)line.Value).ContentType();
             
             var p = Expression.Parameter(typeof(DbDocToken));
             Expression body = Expression.Constant(true);
             
-
-
             var path = line.Field.ToString();
             var lhs = Expression.PropertyOrField(
                 Expression.PropertyOrField(p, nameof(DbDocToken.Path)),
@@ -110,14 +109,59 @@ namespace SW.Content.Search.EF
             
             var compareWith = GetTypeFieldName(valueType);
 
-            Expression constant = Expression.Constant(null);
-            if (line.Value is ContentText text) constant = Expression.Constant(text.Value);
-            else if (line.Value is ContentNumber num) constant = Expression.Constant(num.Value, typeof(decimal?));
-            else if (line.Value is ContentBoolean b) constant = Expression.Constant(b.Value, typeof(bool?));
-            else if (line.Value is ContentDateTime dt) constant = Expression.Constant(dt.Value, typeof(DateTime?));
+            Expression valueComp;
+            if (line.Comparison == SearchQuery.Op.AnyOf)
+            {
+                
+                valueComp = Expression.Constant(false);
+                var list = line.Value as ContentList;
+                foreach (var item in list)
+                {
+                    valueComp = Expression.OrElse(
+                        valueComp,
+                        BuildCriteriaExpr(new SearchQuery.Line(line.Field, SearchQuery.Op.Equals, item)));
+                }
+            }
+            else
+            {
+                Expression constant = Expression.Constant(null);
+                if (line.Value is ContentText text) constant = Expression.Constant(text.Value);
+                else if (line.Value is ContentNumber num) constant = Expression.Constant(num.Value, typeof(decimal?));
+                else if (line.Value is ContentBoolean b) constant = Expression.Constant(b.Value, typeof(bool?));
+                else if (line.Value is ContentDateTime dt) constant = Expression.Constant(dt.Value, typeof(DateTime?));
+
+                var left = Expression.PropertyOrField(p, compareWith);
+
+                
+                switch (line.Comparison)
+                {
+                    case SearchQuery.Op.Equals:
+                        valueComp = Expression.Equal(left, constant);
+                        break;
+
+                    case SearchQuery.Op.GreaterThan:
+                        valueComp = Expression.GreaterThan(left, constant);
+                        break;
+
+                    case SearchQuery.Op.GreaterThanOrEquals:
+                        valueComp = Expression.GreaterThanOrEqual(left, constant);
+                        break;
+
+                    case SearchQuery.Op.LessThan:
+                        valueComp = Expression.LessThan(left, constant);
+                        break;
+
+                    case SearchQuery.Op.LessThanOrEquals:
+                        valueComp = Expression.LessThanOrEqual(left, constant);
+                        break;
+
+
+                    default:
+                        throw new InvalidOperationException($"Op '{line.Comparison}' is not supported");
+                }
+            }
             
-            var valueEq = Expression.Equal(Expression.PropertyOrField(p, compareWith), constant);
-            return Expression.Lambda(Expression.AndAlso(pathEq, valueEq), p);
+            return Expression.Lambda(Expression.AndAlso(pathEq, valueComp), p);
         }
         
 
@@ -152,7 +196,7 @@ namespace SW.Content.Search.EF
                     Expression.PropertyOrField(p, nameof(DocSortValue.Doc)),
                     nameof(DbDoc.Tokens));
 
-                var callAny = Expression.Call(_anyMethod, tokenList, BuildCriteriaExpr(query, line));
+                var callAny = Expression.Call(_anyMethod, tokenList, BuildCriteriaExpr(line));
                 body = Expression.AndAlso(body, callAny);
             }
 
