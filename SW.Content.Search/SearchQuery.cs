@@ -16,7 +16,7 @@ namespace SW.Content.Search
             GreaterThanOrEquals,
             LessThan,
             LessThanOrEquals,
-            Contains
+            AnyOf
         };
 
         public class Line
@@ -25,9 +25,9 @@ namespace SW.Content.Search
 
             public Op Comparison { get; private set; }
 
-            public IContentPrimitive Value { get; private set; }
+            public IContentNode Value { get; private set; }
 
-            public Line(ContentPath path, Op comparison, IContentPrimitive value)
+            public Line(ContentPath path, Op comparison, IContentNode value)
             {
                 Field = path;
                 Comparison = comparison;
@@ -41,6 +41,7 @@ namespace SW.Content.Search
 
         public Line[] QueryLines { get; private set; }
 
+        
         public ContentPath SortByField { get; private set; }
 
         public bool SortByDescending { get; private set; }
