@@ -34,7 +34,7 @@ namespace SW.Content.Search.EF
             Expression lhs, rhs;
 
             lhs = Expression.PropertyOrField(p, nameof(DbDoc.SourceType));
-            rhs = Expression.Constant(source.Type);
+            rhs = Expression.Constant(source.Type.Name);
             var t1 = Expression.Equal(lhs, rhs);
 
             lhs = Expression.PropertyOrField(p, GetKeyFieldName(source));
