@@ -16,11 +16,11 @@ namespace SW.Content.Search.EF
         };
 
 
-        public static JToken Deserialize(string data)
+        public static T Deserialize<T>(string data)
         {
             using (var reader = new JsonTextReader(new StringReader(data)))
             {
-                return jsonSerializer.Deserialize<JToken>(reader);
+                return jsonSerializer.Deserialize<T>(reader);
             }
         }
 

@@ -36,12 +36,9 @@ namespace SW.Content.Search
         }
 
         public DocumentType DocumentType { get; private set; }
-
-        //public ContentText[] Keywords { get; private set; }
-
+        
         public Line[] QueryLines { get; private set; }
 
-        
         public ContentPath SortByField { get; private set; }
 
         public bool SortByDescending { get; private set; }

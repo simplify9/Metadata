@@ -14,7 +14,7 @@ namespace SW.Content.UnitTests
         {
             var m = new[] { "John", "Scotty" };
 
-            Assert.AreEqual(m.Length, JsonUtil.Deserialize(JsonUtil.Serialize(m)).ToObject<string[]>().Length);
+            Assert.AreEqual(m.Length, JsonUtil.Deserialize<string[]>(JsonUtil.Serialize(m)).Length);
         }
     }
 }
