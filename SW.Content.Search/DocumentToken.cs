@@ -14,7 +14,7 @@ namespace SW.Content.Search
 
         public DocumentSource Source { get; }
 
-        public IContentNode SourceData { get;  }
+        public object SourceData { get;  }
 
         public DocumentSourcePath SourcePath { get; }
         
@@ -26,7 +26,7 @@ namespace SW.Content.Search
 
         public DocumentToken(
             DocumentSource source,
-            IContentNode sourceData,
+            object sourceData,
             DocumentSourcePath sourcePath, 
             IContentNode raw, 
             IContentNode normalized,

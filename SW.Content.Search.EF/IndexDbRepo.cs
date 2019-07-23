@@ -94,7 +94,7 @@ namespace SW.Content.Search.EF
 
             doc.LastIndexOn = DateTime.UtcNow;
             doc.BodyEncoding = "application/json";
-            doc.BodyData = JsonUtil.Serialize(token.SourceData.ToJson());
+            doc.BodyData = JsonUtil.Serialize(token.SourceData);
             
             return doc;
         }
