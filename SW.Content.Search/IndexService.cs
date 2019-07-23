@@ -22,14 +22,8 @@ namespace SW.Content.Search
 
             var docType = new DocumentType(source.GetType());
             var docSource = new DocumentSource(docType, ContentFactory.Default.CreateFrom(key));
-            var sourceData = ContentFactory.Default.CreateFrom(source);
-            if (sourceData == null)
-            {
-                throw new InvalidOperationException(
-                    $"Objects of type '{source.GetType()}' are not supported");
-            }
-
-            return new UpdateIndexCommand(docSource, sourceData);
+            
+            return new UpdateIndexCommand(docSource, source);
         }
 
 
@@ -60,9 +54,9 @@ namespace SW.Content.Search
             }
         }
 
-        IEnumerable<DocumentToken> GetTokens(DocumentSource source, IContentNode sourceData)
+        IEnumerable<DocumentToken> GetTokens(DocumentSource source, object sourceData)
         {
-            var pairs = sourceData.Visit().Where(p => p.Value is IContentPrimitive);
+            var pairs = ContentFactory.Default.CreateFrom(sourceData).Visit().Where(p => p.Value is IContentPrimitive);
             ContentPath lastPath = null;
             var offset = 0;
             // filter pairs

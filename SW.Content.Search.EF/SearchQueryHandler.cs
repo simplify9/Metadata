@@ -15,11 +15,7 @@ namespace SW.Content.Search.EF
 {
     public class SearchQueryHandler<TDoc> : ISearchQueryHandler
     {
-
         
-
-        
-
         static readonly MethodInfo _anyMethod;
 
         static SearchQueryHandler()
@@ -36,12 +32,6 @@ namespace SW.Content.Search.EF
             _dbc = dbc;
         }
         
-        
-
-        
-        
-        
-
         public async Task<SearchQueryResult<T>> Handle<T>(SearchQuery query)
         {
             if (query == null) throw new ArgumentNullException(nameof(query));

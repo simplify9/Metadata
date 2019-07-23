@@ -9,9 +9,9 @@ namespace SW.Content.Search.Commands
     {
         public DocumentSource Source { get; }
 
-        public IContentNode SourceData { get; }
+        public object SourceData { get; }
 
-        public UpdateIndexCommand(DocumentSource source, IContentNode sourceData)
+        public UpdateIndexCommand(DocumentSource source, object sourceData)
         {
             Source = source ?? throw new ArgumentNullException(nameof(source));
             SourceData = sourceData ?? throw new ArgumentNullException(nameof(sourceData));
