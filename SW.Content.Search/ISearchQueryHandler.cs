@@ -7,6 +7,6 @@ namespace SW.Content.Search
 {
     public interface ISearchQueryHandler
     {
-        Task<SearchQueryResult> Handle(SearchQuery query);
+        Task<SearchQueryResult<T>> Handle<T>(SearchQuery query);
     }
 }

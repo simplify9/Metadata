@@ -30,7 +30,7 @@ namespace SW.Content.Search.EF
         static SearchQueryHandler()
         {
             //Create Generic Any Method
-            Func<MethodInfo, bool> methodLambda = m => m.Name == "Any" && m.GetParameters().Length == 2;
+            Func<MethodInfo, bool> methodLambda = m => m.Name == nameof(Enumerable.Any) && m.GetParameters().Length == 2;
             _anyMethod = typeof(Enumerable).GetMethods().Where(methodLambda).Single().MakeGenericMethod(typeof(DbDocToken));
         }
         
@@ -40,22 +40,6 @@ namespace SW.Content.Search.EF
         {
             _dbc = dbc;
         }
-
-        //static ContentType FindContentType(Type docType, ContentPath fieldPath)
-        //{
-        //    var sortFieldType = docType;
-        //    foreach (var n in fieldPath)
-        //    {
-        //        sortFieldType = sortFieldType.GetProperty(n).PropertyType;
-        //    }
-
-        //    ContentType t = ContentType.Number;
-        //    if (sortFieldType == typeof(string)) t = ContentType.Text;
-        //    else if (sortFieldType == typeof(bool) || sortFieldType == typeof(bool?)) t = ContentType.Boolean;
-        //    else if (sortFieldType == typeof(DateTime) || sortFieldType == typeof(DateTime?)) t = ContentType.DateTime;
-
-        //    return t;
-        //}
         
         static string GetTypeFieldName(ContentType type)
         {
@@ -65,41 +49,31 @@ namespace SW.Content.Search.EF
                 case ContentType.DateTime: return nameof(DbDocToken.ValueAsDateTime);
                 case ContentType.Number: return nameof(DbDocToken.ValueAsNumber);
                 case ContentType.Text: return nameof(DbDocToken.ValueAsString);
+                case ContentType.Null: return nameof(DbDocToken.ValueAsAny);
                 default: throw new NotSupportedException("content type not supported");
             }
         }
 
         static IQueryable<DocSortValue> BuildSortBy(SearchQuery query, IQueryable<DocSortValue> q)
         {
-            //var leafTypes = query.DocumentType.GetLeafContentTypes(query.SortByField);
-
-            var schema = query.DocumentType.Schema;
-            
             var columnName = nameof(DbDocToken.ValueAsAny);
             ParameterExpression parameter = Expression.Parameter(q.ElementType);
             MemberExpression property = Expression.Property(
                 Expression.PropertyOrField(parameter, nameof(DocSortValue.OrderBy)), 
                 columnName);
             LambdaExpression lambda = Expression.Lambda(property, parameter);
-            string methodName = query.SortByDescending ? "OrderByDescending": "OrderBy";
+            string methodName = query.SortByDescending 
+                ? nameof(Enumerable.OrderByDescending) 
+                : nameof(Enumerable.OrderBy);
             Expression methodCallExpression = Expression.Call(typeof(Queryable), methodName,
                                   new Type[] { q.ElementType, property.Type },
                                   q.Expression, Expression.Quote(lambda));
             return q.Provider.CreateQuery<DocSortValue>(methodCallExpression);
         }
- 
-        //static ContentType[] ResolveOrderByContentType(IMust docSchema, ContentPath path)
-        //{
-        //    if (docSchema.TryGetSchema(path, out IMust fieldSchema))
-        //    {
-        //        //fieldSchema.
-        //    }
-            
-        //}
         
         Expression BuildCriteriaExpr(SearchQuery.Line line)
         {
-            var valueType = ((IContentNode)line.Value).ContentType();
+            var valueType = line.Value.ContentType();
             
             var p = Expression.Parameter(typeof(DbDocToken));
             Expression body = Expression.Constant(true);
@@ -111,8 +85,7 @@ namespace SW.Content.Search.EF
             var rhs = Expression.Constant(path, typeof(string));
             var pathEq = Expression.Equal(lhs, rhs);
             
-            var compareWith = GetTypeFieldName(valueType);
-
+            
             Expression valueComp;
             if (line.Comparison == SearchQuery.Op.AnyOf)
             {
@@ -128,8 +101,10 @@ namespace SW.Content.Search.EF
             }
             else
             {
+                var compareWith = GetTypeFieldName(valueType);
+
                 Expression constant = Expression.Constant(null);
-                if (line.Value is ContentText text) constant = Expression.Constant(text.Value);
+                if (line.Value is ContentText text) constant = Expression.Constant(text.Value.ToLowerInvariant());
                 else if (line.Value is ContentNumber num) constant = Expression.Constant(num.Value, typeof(decimal?));
                 else if (line.Value is ContentBoolean b) constant = Expression.Constant(b.Value, typeof(bool?));
                 else if (line.Value is ContentDateTime dt) constant = Expression.Constant(dt.Value, typeof(DateTime?));
@@ -169,7 +144,7 @@ namespace SW.Content.Search.EF
         }
         
 
-        public async Task<SearchQueryResult> Handle(SearchQuery query)
+        public async Task<SearchQueryResult<T>> Handle<T>(SearchQuery query)
         {
             if (query == null) throw new ArgumentNullException(nameof(query));
 
@@ -205,7 +180,7 @@ namespace SW.Content.Search.EF
             }
 
             var where = Expression.Lambda<Func<DocSortValue, bool>>(body, p);
-            q = q.Where(where);
+            q = q.Where(where).Where(d => d.Doc.SourceType == docTypeName);
             
             // apply sorting and pagination
 
@@ -213,8 +188,8 @@ namespace SW.Content.Search.EF
             var count = await q.CountAsync();
             var matches = await q.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
             
-            return new SearchQueryResult(matches
-                .Select(m => JsonUtil.Deserialize(m.Doc.BodyData)).ToArray(), 
+            return new SearchQueryResult<T>(matches
+                .Select(m => JsonUtil.Deserialize<T>(m.Doc.BodyData)).ToArray(), 
                 count);
         }
     }

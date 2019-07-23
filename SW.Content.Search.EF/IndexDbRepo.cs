@@ -173,7 +173,7 @@ namespace SW.Content.Search.EF
                     if (t.Normalized is ContentNumber n) dbToken.ValueAsNumber = n.Value;
                     else if (t.Normalized is ContentDateTime dt) dbToken.ValueAsDateTime = dt.Value;
                     else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
-                    else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value;
+                    else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
                 }
 
 

@@ -5,13 +5,13 @@ using System.Text;
 
 namespace SW.Content.Search
 {
-    public class SearchQueryResult
+    public class SearchQueryResult<T>
     {
-        public JToken[] Matches { get; private set; }
+        public T[] Matches { get; private set; }
 
         public int Total { get; private set; }
 
-        public SearchQueryResult(JToken[] matches, int total)
+        public SearchQueryResult(T[] matches, int total)
         {
             Matches = matches;
             Total = total;
