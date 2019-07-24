@@ -43,20 +43,25 @@ namespace SW.Content.Search
             foreach (var pair in source)
             {
                 var lastNode = pair.Path.LastOrDefault();
-                if (lastNode != null && lastNode is ContentPath.ListIndex)
+                if (lastNode != null && lastNode is ContentPath.AnyListIndex)
                 {
                     yield return new ContentPathValue(
                         pair.Path.Sub(0, pair.Path.Length - 1),
                             pair.Value);
                 }
-
                 yield return pair;
             }
         }
 
         IEnumerable<DocumentToken> GetTokens(DocumentSource source, object sourceData)
         {
-            var pairs = ContentFactory.Default.CreateFrom(sourceData).Visit().Where(p => p.Value is IContentPrimitive);
+            var pairs = ContentFactory.Default.CreateFrom(sourceData).Visit()
+                .Where(p => p.Value is IContentPrimitive)
+                .Select(p => new ContentPathValue(
+                    ContentPath.Root
+                        .Append(p.Path
+                            .Select(n => 
+                                n is ContentPath.ListIndex? ContentPath.AnyIndex : n)), p.Value));
             ContentPath lastPath = null;
             var offset = 0;
             // filter pairs
