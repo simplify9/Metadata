@@ -32,12 +32,12 @@ namespace SW.Content
 
         public string CreateMatchKey()
         {
-            return KEY;
+            return null;
         }
 
         public override string ToString()
         {
-            return KEY;
+            return "NULL";
         }
 
         public bool TryEvaluate(ContentPath path, out IContentNode result)

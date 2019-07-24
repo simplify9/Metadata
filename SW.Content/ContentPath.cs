@@ -39,6 +39,24 @@ namespace SW.Content
             }
         }
 
+        public class AnyListIndex : INode
+        {
+            public override bool Equals(object obj)
+            {
+                return obj is AnyListIndex;
+            }
+
+            public override int GetHashCode()
+            {
+                return ToString().GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return "[]";
+            }
+        }
+
         public class ListIndex : INode
         {
             public int Index { get; }
@@ -64,16 +82,17 @@ namespace SW.Content
             }
         }
 
+        
 
         static readonly string _propertyRegex = @"([a-z]|[A-Z]|_)+([a-z]|[A-Z]|_|[0-9])*";
-        static readonly string _indexRegex = @"\[[0-9]+\]";
+        static readonly string _indexRegex = @"\[[0-9]*\]";
         static readonly Regex _regex = new Regex($@"^\$(\.(({_propertyRegex})|({_indexRegex})))*$", RegexOptions.Compiled);
 
         static readonly INode[] _noNodes = { };
 
         public static readonly ContentPath Root = new ContentPath();
 
-
+        public static readonly AnyListIndex AnyIndex = new AnyListIndex();
 
         readonly INode _token;
         readonly ContentPath _parent;
@@ -100,7 +119,7 @@ namespace SW.Content
             if (representation == "$") path = Root;
             else path = Root.Append(representation.Split('.').Skip(1)
                 .Select(p => p.StartsWith("[")
-                    ? (INode)new ListIndex(int.Parse(p.Trim('[', ']')))
+                    ? (p.Length > 2? (INode)new ListIndex(int.Parse(p.Trim('[', ']'))): AnyIndex)
                     : new ObjectProperty(p)));
             return true;
         }
