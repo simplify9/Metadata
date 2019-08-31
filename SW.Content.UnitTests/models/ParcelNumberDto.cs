@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SW.Content.UnitTests.models
 {
-    class ParcelNumberDto
+    public class ParcelNumberDto
     {
        
 
