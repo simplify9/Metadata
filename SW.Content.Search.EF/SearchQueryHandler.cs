@@ -37,9 +37,9 @@ namespace SW.Content.Search.EF
             if (query == null) throw new ArgumentNullException(nameof(query));
 
             var docTypeName = query.DocumentType.Name;
-            var paths = await _dbc.Set<DbDocSourcePath>()
-                .Where(row => row.DocumentType == docTypeName)
-                .ToDictionaryAsync(o => o.PathString);
+            //var paths = await _dbc.Set<DbDocSourcePath>()
+            //    .Where(row => row.DocumentType == docTypeName)
+            //    .ToDictionaryAsync(o => o.PathString);
 
             // create a sortable model
 
