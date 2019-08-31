@@ -39,5 +39,10 @@ namespace SW.Content.Search
             Normalized = normalized ?? throw new ArgumentNullException(nameof(normalized));
             Locale = locale;
         }
+
+        public override string ToString()
+        {
+            return $"{SourcePath} --> {Raw}";
+        }
     }
 }
