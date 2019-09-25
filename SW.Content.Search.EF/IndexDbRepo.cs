@@ -124,64 +124,64 @@ namespace SW.Content.Search.EF
 
         public async Task SaveTokens(DocumentToken[] tokens)
         {
-            using (var transaction = _dbc.Database.BeginTransaction())
-            {
-                var docs = await BuildDocumentSetQueryable(tokens.Select(t => t.Source).Distinct())
+            //using (var transaction = _dbc.Database.BeginTransaction())
+            //{
+            var docs = await BuildDocumentSetQueryable(tokens.Select(t => t.Source).Distinct())
                 .Include(d => d.Tokens)
                 .ToArrayAsync();
-                //.Include(d => d.Tokens.Select(t => t.Path));
+            //.Include(d => d.Tokens.Select(t => t.Path));
 
-                // ensure paths
-                var types = tokens.Select(t => t.Source.Type.Name).Distinct();
-                var paths = await _dbc.Set<DbDocSourcePath>()
-                    .Where(p => types.Contains(p.DocumentType))
-                    .ToArrayAsync();
+            // ensure paths
+            var types = tokens.Select(t => t.Source.Type.Name).Distinct();
+            var paths = await _dbc.Set<DbDocSourcePath>()
+                .Where(p => types.Contains(p.DocumentType))
+                .ToArrayAsync();
 
-                foreach (var t in tokens)
+            foreach (var t in tokens)
+            {
+
+                var doc = GetOrCreateDoc(t);
+                var path = GetOrCreatePath(t);
+                var pathString = t.SourcePath.Path.ToString();
+                var dbToken = doc.Tokens
+                    .FirstOrDefault(tOld =>
+                        tOld.Path.PathString == pathString &&
+                        tOld.Offset == t.SourcePath.Offset);
+                if (dbToken == null)
                 {
-
-                    var doc = GetOrCreateDoc(t);
-                    var path = GetOrCreatePath(t);
-                    var pathString = t.SourcePath.Path.ToString();
-                    var dbToken = doc.Tokens
-                        .FirstOrDefault(tOld =>
-                            tOld.Path.PathString == pathString &&
-                            tOld.Offset == t.SourcePath.Offset);
-                    if (dbToken == null)
+                    dbToken = new DbDocToken
                     {
-                        dbToken = new DbDocToken
-                        {
-                            CreatedOn = DateTime.UtcNow,
-                            Document = doc,
-                            Path = path,
-                            Offset = t.SourcePath.Offset
-                        };
+                        CreatedOn = DateTime.UtcNow,
+                        Document = doc,
+                        Path = path,
+                        Offset = t.SourcePath.Offset
+                    };
 
-                        doc.Tokens.Add(dbToken);
-                    }
-
-                    dbToken.LastUpdatedOn = DateTime.UtcNow;
-
-                    dbToken.ValueAsAny = null;
-                    dbToken.ValueAsBoolean = null;
-                    dbToken.ValueAsDateTime = null;
-                    dbToken.ValueAsNumber = null;
-                    dbToken.ValueAsString = null;
-
-                    if (!(t.Normalized is ContentNull))
-                    {
-                        dbToken.ValueAsAny = ((IContentPrimitive)t.Raw).CreateMatchKey();
-                        if (t.Normalized is ContentNumber n) dbToken.ValueAsNumber = n.Value;
-                        else if (t.Normalized is ContentDateTime dt) dbToken.ValueAsDateTime = dt.Value;
-                        else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
-                        else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
-                    }
+                    doc.Tokens.Add(dbToken);
                 }
 
-                await _dbc.SaveChangesAsync();
+                dbToken.LastUpdatedOn = DateTime.UtcNow;
 
-                transaction.Commit();
+                dbToken.ValueAsAny = null;
+                dbToken.ValueAsBoolean = null;
+                dbToken.ValueAsDateTime = null;
+                dbToken.ValueAsNumber = null;
+                dbToken.ValueAsString = null;
+
+                if (!(t.Normalized is ContentNull))
+                {
+                    dbToken.ValueAsAny = ((IContentPrimitive)t.Raw).CreateMatchKey();
+                    if (t.Normalized is ContentNumber n) dbToken.ValueAsNumber = n.Value;
+                    else if (t.Normalized is ContentDateTime dt) dbToken.ValueAsDateTime = dt.Value;
+                    else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
+                    else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
+                }
             }
+
+            await _dbc.SaveChangesAsync();
+
+            //    transaction.Commit();
+            //}
         }
 
         public async Task DeleteDocuments(DocumentSource[] sources)
