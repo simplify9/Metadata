@@ -8,7 +8,7 @@ namespace SW.Content.Filters
 {
     public class RegexFilter : ContentFilterBase
     {
-        public override ContentFilterType Type => ContentFilterType.Regex;
+        //public override ContentFilterType Type => ContentFilterType.Regex;
 
         public IContentExpression Value { get; }
 

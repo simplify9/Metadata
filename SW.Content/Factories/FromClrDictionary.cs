@@ -62,13 +62,13 @@ namespace SW.Content.Factories
             return new ContentObject(e, obj, _memberFactory);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
             var enumerableType = type.GetEnumerableTypeArgument();
             if (!Include(enumerableType)) return null;
-            return new MustBeObject(
-                _schemaFactory.CreateSchemaNodeFrom(enumerableType.GetGenericArguments()[1]), 
-                new ContentSchemaRule[] { });
+            return new TypeDef<ContentObject>();
+                //_schemaFactory.CreateSchemaNodeFrom(enumerableType.GetGenericArguments()[1]), 
+                //new ContentSchemaRuleOfT[] { });
         }
     }
 }

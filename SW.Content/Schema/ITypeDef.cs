@@ -4,11 +4,9 @@ using System.Text;
 
 namespace SW.Content.Schema
 {
-    public interface IMust
+    public interface ITypeDef
     {
         
-        bool TryGetSchema(ContentPath path, out IMust schema); 
-
         IEnumerable<SchemaIssue> FindIssues(IContentNode node);
     }
 }

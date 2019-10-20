@@ -23,18 +23,19 @@ namespace SW.Content.Factories
             return new ContentEntity(GetEntityName(t), from.ToString());
         }
 
-        public IMust CreateSchemaNodeFrom(Type t)
+        public ITypeDef CreateSchemaNodeFrom(Type t)
         {
             var nullable = t.IsNullableType();
             t = nullable ? Nullable.GetUnderlyingType(t) : t;
 
-            var schema = new MustBeEntityWithName(GetEntityName(t), new ContentSchemaRule[] { });
+            var schema = new TypeDef<ContentEntity>()
+                .WithConstraint("_entity_type", new EntityTypeConstraint(GetEntityName(t)));
             return !nullable
-                ? (IMust)schema
-                : new MustBeOneOf(new IMust[]
+                ? (ITypeDef)schema
+                : new MustBeOneOf(new ITypeDef[]
                 {
                     schema,
-                    new MustBeNull()
+                    new TypeDef<ContentNull>()
                 });
         }
     }

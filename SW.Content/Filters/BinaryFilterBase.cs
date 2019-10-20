@@ -10,13 +10,13 @@ namespace SW.Content.Filters
 
         public IContentFilter Right { get; private set; }
         
-        public override ContentFilterType Type { get; }
+        //public override ContentFilterType Type { get; }
 
-        protected BinaryFilterBase(ContentFilterType type, IContentFilter left, IContentFilter right)
+        protected BinaryFilterBase(/*ContentFilterType type,*/ IContentFilter left, IContentFilter right)
         {
             Left = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
-            Type = type;
+            //Type = type;
         }
 
         //public abstract bool IsMatch(IContentNode document);
@@ -30,8 +30,7 @@ namespace SW.Content.Filters
         {
             return other != null &&
                    Left.Equals(other.Left) &&
-                   Right.Equals(other.Right) &&
-                   Type == other.Type;
+                   Right.Equals(other.Right);
         }
 
         public override int GetHashCode()
@@ -39,7 +38,7 @@ namespace SW.Content.Filters
             var hashCode = -412577974;
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentFilter>.Default.GetHashCode(Left);
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentFilter>.Default.GetHashCode(Right);
-            hashCode = hashCode * -1521134295 + Type.GetHashCode();
+            hashCode = hashCode * -1521134295 ;
             return hashCode;
         }
 

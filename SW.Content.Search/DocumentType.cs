@@ -10,7 +10,7 @@ namespace SW.Content.Search
     {
         public string Name { get; private set; }
 
-        public IMust Schema { get; private set; }
+        public ITypeDef Schema { get; private set; }
         
         public DocumentType(Type fromType)
         {

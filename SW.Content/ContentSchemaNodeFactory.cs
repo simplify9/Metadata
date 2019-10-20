@@ -33,7 +33,7 @@ namespace SW.Content
                     };
             }
             
-            public IMust CreateSchemaNodeFrom(Type type)
+            public ITypeDef CreateSchemaNodeFrom(Type type)
             {
                 if (type == null) throw new ArgumentNullException(nameof(type));
 

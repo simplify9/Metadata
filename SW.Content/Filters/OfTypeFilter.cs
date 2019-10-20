@@ -7,7 +7,7 @@ namespace SW.Content.Filters
 {
     public class OfTypeFilter : ContentFilterBase
     {
-        public override ContentFilterType Type => ContentFilterType.OfType;
+        //public override ContentFilterType Type => ContentFilterType.OfType;
 
         public IContentExpression Value { get; }
 

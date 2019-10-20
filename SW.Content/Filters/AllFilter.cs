@@ -6,7 +6,7 @@ namespace SW.Content.Filters
 {
     public class AllFilter : ContentFilterBase, IEquatable<AllFilter>
     {
-        public override ContentFilterType Type => ContentFilterType.All;
+        //public override ContentFilterType Type => ContentFilterType.All;
 
         public override bool Equals(object obj)
         {
@@ -20,7 +20,7 @@ namespace SW.Content.Filters
 
         public override int GetHashCode()
         {
-            return 2049151605 + Type.GetHashCode();
+            return 2049151605;
         }
 
         public override bool IsMatch(IContentNode value)

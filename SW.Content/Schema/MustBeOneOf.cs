@@ -5,41 +5,46 @@ using System.Text;
 
 namespace SW.Content.Schema
 {
-    public class MustBeOneOf : IMust
+    public class MustBeOneOf : TypeDef<IContentNode>
     {
         
-        public IEnumerable<IMust> Options { get; }
+        public IEnumerable<ITypeDef> Options { get; }
 
-        public MustBeOneOf(IEnumerable<IMust> options)
+        public MustBeOneOf(IEnumerable<ITypeDef> options)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public IEnumerable<SchemaIssue> FindIssues(IContentNode node)
+        public override IEnumerable<SchemaIssue> FindIssues(IContentNode node)
         {
-            if (node == null)
+            if (node == null) throw new ArgumentNullException(nameof(node));
+
+            var issues = base.FindIssues(node);
+            if (issues.Any())
             {
-                throw new ArgumentNullException(nameof(node));
-            }
-            
-            foreach (var option in Options)
-            {
-                var issues = option.FindIssues(node);
-                if (!issues.Any())
+                foreach (var i in issues)
                 {
-                    yield break;
+                    yield return i;
                 }
             }
+            else
+            {
+                foreach (var option in Options)
+                {
+                    issues = option.FindIssues(node);
+                    if (!issues.Any())
+                    {
+                        yield break;
+                    }
+                }
 
-            yield return new SchemaIssue(ContentPath.Root, 
-                $"Value did not match any of the following: {string.Join(",", Options)}");
+                yield return new SchemaIssue(ContentPath.Root,
+                    $"Value did not match any of the following: {string.Join(",", Options)}");
 
-            yield break;
+                yield break;
+            }
+            
         }
-
-        public bool TryGetSchema(ContentPath path, out IMust schema)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

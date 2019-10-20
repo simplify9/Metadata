@@ -14,10 +14,10 @@ namespace SW.Content.Factories
             return new ContentText((string)obj);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
             if (type != typeof(string)) return null;
-            var schema = new MustHaveType<ContentText>(new ContentSchemaRule[] { });
+            var schema = new TypeDef<ContentText>();
             return schema;
 
         }

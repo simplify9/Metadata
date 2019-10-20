@@ -145,16 +145,16 @@ namespace SW.Content.Serialization
                 {
                     if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(TokenType.Equals);
-                    exp = new EqualToFilter(exp, 
-                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t)));
+                    exp = new FilterExpression(new EqualToFilter(exp, 
+                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t))));
                 }
 
                 else if (lookAhead.TokenType == TokenType.Contains)
                 {
                     if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(TokenType.Contains);
-                    exp = new ContainsFilter(exp, 
-                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t)));
+                    exp = new FilterExpression(new ContainsFilter(exp, 
+                        ParseExpression(q, t => t.TokenType == TokenType.And || t.TokenType == TokenType.Or || terminate(t))));
                 }
 
                 else if (lookAhead.TokenType == TokenType.MatchRegex)
@@ -162,7 +162,7 @@ namespace SW.Content.Serialization
                     if (exp == null) throw new ParserException($"Unexpected token", lookAhead);
                     var token = q.DequeueAndValidate(TokenType.MatchRegex);
                     var pattern = q.DequeueAndValidate(TokenType.String);
-                    exp = new RegexFilter(exp, pattern.Value);
+                    exp = new FilterExpression(new RegexFilter(exp, pattern.Value));
                 }
 
                 else if (lookAhead.TokenType == TokenType.And)
@@ -174,7 +174,7 @@ namespace SW.Content.Serialization
                         var right = ParseExpression(q, terminate);
                         if (right is IContentFilter rightBool)
                         {
-                            exp = new AndFilter(leftBool, rightBool);
+                            exp = new FilterExpression(new AndFilter(leftBool, rightBool));
                         }
                         else
                         {
@@ -196,7 +196,7 @@ namespace SW.Content.Serialization
                         var right = ParseExpression(q, terminate);
                         if (right is IContentFilter rightBool)
                         {
-                            exp = new OrFilter(leftBool, rightBool);
+                            exp = new FilterExpression( new OrFilter(leftBool, rightBool));
                         }
                         else
                         {

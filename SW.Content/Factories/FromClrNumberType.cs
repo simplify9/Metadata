@@ -26,18 +26,18 @@ namespace SW.Content.Factories
             return new ContentNumber((decimal)Convert.ChangeType(obj, typeof(decimal)));
         }
 
-        public IMust CreateSchemaNodeFrom(Type t)
+        public ITypeDef CreateSchemaNodeFrom(Type t)
         {
             var nullable = t.IsNullableType();
             t = nullable ? Nullable.GetUnderlyingType(t) : t;
             if (!_numberTypes.Any(n => n.IsAssignableFrom(t))) return null;
-            var schema = new MustHaveType<ContentNumber>(new ContentSchemaRule[] { });
+            var schema = new TypeDef<ContentNumber>();
             return !nullable
-                ? (IMust)schema
-                : new MustBeOneOf(new IMust[]
+                ? (ITypeDef)schema
+                : new MustBeOneOf(new ITypeDef[]
                 {
                     schema,
-                    new MustBeNull()
+                    new TypeDef<ContentNull>()
                 });
         }
     }

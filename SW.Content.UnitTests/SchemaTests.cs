@@ -13,7 +13,7 @@ namespace SW.Content.UnitTests
     [TestClass]
     public class SchemaTests
     {
-        static readonly ContentSchemaRule[] _noRules = new ContentSchemaRule[] { };
+        static readonly IContentSchemaConstraint[] _noRules = new IContentSchemaConstraint[] { };
 
         [TestMethod]
         public void Test_TypeToSchema()
@@ -21,9 +21,9 @@ namespace SW.Content.UnitTests
             var f = ContentSchemaNodeFactory.Default;
             var schema = f.CreateSchemaNodeFrom(typeof(Employee));
 
-            Assert.IsInstanceOfType(schema, typeof(MustBeObject));
+            Assert.IsInstanceOfType(schema, typeof(TypeDef<ContentObject>));
 
-            var objSchema = schema as MustBeObject;
+            var objSchema = schema as TypeDef<ContentObject>;
 
             var emp = ContentFactory.Default.CreateFrom(Employee.Sample);
 
@@ -35,21 +35,18 @@ namespace SW.Content.UnitTests
         [TestMethod]
         public void Test_Validation()
         {
-             
-            var employeeSchema = new MustBeObject(
-                new ContentProperty[]
-                {
-                    new ContentProperty("Id", new MustHaveType<ContentNumber>(_noRules), true),
-                    new ContentProperty("Name", new MustHaveType<ContentText>(_noRules), true),
-                    new ContentProperty("Phones", new MustBeList(
-                        new MustHaveType<ContentText>(_noRules), 1, 3, _noRules), false),
-                    new ContentProperty("Salary", new MustBeObject(new ContentProperty[]
-                    {
-                        new ContentProperty("Amount", new MustHaveType<ContentNumber>(_noRules), true),
-                        new ContentProperty("Currency", new MustHaveType<ContentText>(new[] {new ContentSchemaRule("regex", new RegexFilter(new ScopeRootExpression(), "^[A-Z]{3,3}$")) }), true)
-                    }, _noRules), true)
-                }, _noRules);
 
+            var employeeSchema = new TypeDef<ContentObject>()
+                .WithProperty("Id", true, new TypeDef<ContentNumber>())
+                .WithProperty("Name", true, new TypeDef<ContentText>())
+                .WithProperty("Phones", false, new TypeDef<ContentList>()
+                    .WithItemsOfType(new TypeDef<ContentText>())
+                    .WithConstraint("_range", new ListItemCountConstraint(1, 3)))
+                .WithProperty("Salary", true, new TypeDef<ContentObject>()
+                    .WithProperty("Amount", true, new TypeDef<ContentNumber>())
+                    .WithProperty("Currency", true, new TypeDef<ContentText>()
+                        .WithConstraint("_regex", new RegexConstraint("^[A-Z]{3,3}$"))));
+                
             var issues = employeeSchema
                 .FindIssues(ContentFactory.Default.CreateFrom(Employee.Sample))
                 .ToArray();
@@ -68,7 +65,7 @@ namespace SW.Content.UnitTests
             var expectedSubject = ContentPath.Root.Append(nameof(Employee.Salary)).Append(nameof(Money.Currency));
             Assert.AreEqual(expectedSubject, issues[0].SubjectPath);
 
-            var dto = employeeSchema.ToDto();
+            //var dto = employeeSchema.ToDto();
 
             
         }

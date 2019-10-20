@@ -15,16 +15,16 @@ namespace SW.Content.Factories
             return new  ContentDateTime((DateTime)obj);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
             if (!(type == typeof(DateTime) || type == typeof(DateTime?))) return null;
-            var schema = new MustBeDateTime(true, true, new ContentSchemaRule[] { });
+            var schema = new TypeDef<ContentDateTime>();
             return (type == typeof(DateTime))
-                ? (IMust)schema
-                : new MustBeOneOf(new IMust[]
+                ? (ITypeDef)schema
+                : new MustBeOneOf(new ITypeDef[]
                 {
                     schema,
-                    new MustBeNull()
+                    new TypeDef<ContentNull>()
                 });
 
         }

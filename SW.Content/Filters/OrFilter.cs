@@ -13,7 +13,7 @@ namespace SW.Content.Filters
         }
 
         public OrFilter(IContentFilter left, IContentFilter right) 
-            : base(ContentFilterType.Or, left, right)
+            : base(left, right)
         {
 
         }

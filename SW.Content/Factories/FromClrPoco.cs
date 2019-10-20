@@ -29,16 +29,24 @@ namespace SW.Content.Factories
             return new ContentObject(keyValuePairs, obj, _memberFactory);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
-            if (type == typeof(object)) return new CanBeAnything();
-
+            if (type == typeof(object)) return new TypeDef<IContentNode>();
+            
             var props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Select(p => new ContentProperty(p.Name, 
-                    _schemaFactory.CreateSchemaNodeFrom(p.PropertyType),
-                    false));
+                .Select(p => new
+                {
+                    p.Name,
+                    Type = _schemaFactory.CreateSchemaNodeFrom(p.PropertyType)
+                });
 
-            return new MustBeObject(props, new ContentSchemaRule[] { });
+            var typeDef = new TypeDef<ContentObject>();
+            foreach (var prop in props)
+            {
+                typeDef = typeDef.WithProperty(prop.Name, false, prop.Type);
+            }
+
+            return typeDef;
         }
     }
 }

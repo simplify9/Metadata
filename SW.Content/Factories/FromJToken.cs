@@ -70,9 +70,9 @@ namespace SW.Content.Factories
             throw new InvalidOperationException("Unidentified JToken");
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
-            if (type == typeof(JToken)) return new CanBeAnything();
+            if (type == typeof(JToken)) return new TypeDef<IContentNode>();
             return null;
         }
     }

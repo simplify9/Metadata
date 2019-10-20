@@ -13,7 +13,7 @@ namespace SW.Content.Filters
         }
 
         public AndFilter(IContentFilter left, IContentFilter right) 
-            : base(ContentFilterType.And, left, right)
+            : base(left, right)
         {
 
         }

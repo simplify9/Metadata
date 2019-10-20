@@ -6,7 +6,7 @@ namespace SW.Content.Filters
 {
     public interface IContentFilter
     {
-        ContentFilterType Type { get; }
+        //ContentFilterType Type { get; }
 
         bool IsMatch(IContentNode document);
     }

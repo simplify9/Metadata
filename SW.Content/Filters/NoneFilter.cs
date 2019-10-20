@@ -6,7 +6,7 @@ namespace SW.Content.Filters
 {
     public class NoneFilter : ContentFilterBase, IEquatable<NoneFilter>
     {
-        public override ContentFilterType Type => ContentFilterType.None;
+        //public override ContentFilterType Type => ContentFilterType.None;
 
         public override bool Equals(object obj)
         {
@@ -20,7 +20,7 @@ namespace SW.Content.Filters
 
         public override int GetHashCode()
         {
-            return 2049151605 + Type.GetHashCode();
+            return 2049151605;// + Type.GetHashCode();
         }
 
         public override bool IsMatch(IContentNode document)

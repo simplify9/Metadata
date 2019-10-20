@@ -8,9 +8,7 @@ namespace SW.Content
     {
         
         bool TryEvaluate(ContentPath path, out IContentNode result);
-
         
-
         ComparisonResult CompareWith(IContentNode other);
     }
 }

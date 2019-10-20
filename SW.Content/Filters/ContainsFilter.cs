@@ -12,7 +12,7 @@ namespace SW.Content.Filters
 
         public IContentExpression Item { get; private set; }
 
-        public override ContentFilterType Type => ContentFilterType.Contains;
+        //public override ContentFilterType Type => ContentFilterType.Contains;
         
 
         public ContainsFilter(IContentExpression list, IContentExpression item)
@@ -52,7 +52,7 @@ namespace SW.Content.Filters
         public bool Equals(ContainsFilter other)
         {
             return other != null &&
-                    Type == other.Type &&
+                    //Type == other.Type &&
                     List.Equals(other.List) &&
                     Item.Equals(other.Item);
         }
@@ -62,7 +62,7 @@ namespace SW.Content.Filters
             var hashCode = -1217978;
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(List);
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Item);
-            hashCode = hashCode * -1521134295 + Type.GetHashCode();
+            hashCode = hashCode * -1521134295;
             return hashCode;
         }
 

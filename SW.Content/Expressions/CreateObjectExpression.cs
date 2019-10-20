@@ -65,11 +65,8 @@ namespace SW.Content.Expressions
 
         public ExpressionIssue TryEvaluate(IContentNode input, out IContentNode result)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            
             result = null;
 
             var attributeMap = new Dictionary<string, object>();

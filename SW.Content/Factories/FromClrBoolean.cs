@@ -17,16 +17,16 @@ namespace SW.Content.Factories
             return new ContentBoolean((bool)obj);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
             if (!(type == typeof(bool) || type == typeof(bool?))) return null;
-            var schema = new MustHaveType<ContentBoolean>(new ContentSchemaRule[] { });
+            var schema = new TypeDef<ContentBoolean>();
             return (type == typeof(bool))
-                ? (IMust)schema
-                : new MustBeOneOf(new IMust[]
+                ? (ITypeDef)schema
+                : new MustBeOneOf(new ITypeDef[]
                 {
                     schema,
-                    new MustBeNull()
+                    new TypeDef<ContentNull>()
                 });
              
         }

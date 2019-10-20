@@ -6,16 +6,16 @@ namespace SW.Content
 {
     public class ContentEntity : ContentPrimitive<string>
     {
-        public string EntityName { get; }
+        public string EntityType { get; }
 
         public ContentEntity(string entityType, string value) : base(value)
         {
-            EntityName = entityType;
+            EntityType = entityType;
         }
 
         public override string ToString()
         {
-            return $"{EntityName}(\"{_value}\")";
+            return $"{EntityType}(\"{_value}\")";
         }
     }
 }

@@ -7,6 +7,6 @@ namespace SW.Content
 {
     public interface IContentSchemaNodeFactory
     {
-        IMust CreateSchemaNodeFrom(Type type);
+        ITypeDef CreateSchemaNodeFrom(Type type);
     }
 }

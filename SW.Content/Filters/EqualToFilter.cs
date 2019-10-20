@@ -11,7 +11,7 @@ namespace SW.Content.Filters
 
         public IContentExpression Right { get; private set; }
 
-        public override ContentFilterType Type => ContentFilterType.EqualTo;
+        //public override ContentFilterType Type => ContentFilterType.EqualTo;
 
         public EqualToFilter(IContentExpression left, IContentExpression right)
         {
@@ -44,7 +44,7 @@ namespace SW.Content.Filters
         public bool Equals(EqualToFilter other)
         {
             return other != null &&
-                    Type == other.Type &&
+                    //Type == other.Type &&
                     Left.Equals(other.Left) &&
                     Right.Equals(other.Right);
         }
@@ -54,7 +54,7 @@ namespace SW.Content.Filters
             var hashCode = 368036125;
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Left);
             hashCode = hashCode * -1521134295 + EqualityComparer<IContentExpression>.Default.GetHashCode(Right);
-            hashCode = hashCode * -1521134295 + Type.GetHashCode();
+            hashCode = hashCode * -1521134295;// + Type.GetHashCode();
             return hashCode;
         }
 

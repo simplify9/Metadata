@@ -14,15 +14,15 @@ namespace SW.Content.Factories
             return value;
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
-            if (type == typeof(IContentNode)) return new CanBeAnything();
+            if (type == typeof(IContentNode)) return new TypeDef<IContentNode>();
             if (typeof(IContentNode).IsAssignableFrom(type))
             {
 
-                var schemaType = typeof(MustHaveType<>).MakeGenericType(type);
-                return Activator.CreateInstance(schemaType, new ContentSchemaRule[] { } as object)
-                    as IMust;
+                var schemaType = typeof(TypeDef<>).MakeGenericType(type);
+                return Activator.CreateInstance(schemaType)
+                    as ITypeDef;
             }
             return null;
         }

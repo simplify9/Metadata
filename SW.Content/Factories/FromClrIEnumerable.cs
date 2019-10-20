@@ -51,13 +51,13 @@ namespace SW.Content.Factories
             //return new ContentList(e, _itemFactory);
         }
 
-        public IMust CreateSchemaNodeFrom(Type type)
+        public ITypeDef CreateSchemaNodeFrom(Type type)
         {
             var enumerableType = type.GetEnumerableTypeArgument();
             if (enumerableType == null) return null;
 
-            return new MustBeList(_schemaFactory.CreateSchemaNodeFrom(enumerableType),
-                null, null, new ContentSchemaRule[] { });
+            return new TypeDef<ContentList>()
+                .WithItemsOfType(_schemaFactory.CreateSchemaNodeFrom(enumerableType));
         }
     }
 }

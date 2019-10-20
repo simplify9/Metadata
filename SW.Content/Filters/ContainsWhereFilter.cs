@@ -8,7 +8,7 @@ namespace SW.Content.Filters
 {
     public class ContainsWhereFilter : ContentFilterBase
     {
-        public override ContentFilterType Type => ContentFilterType.ContainsWhere;
+        //public override ContentFilterType Type => ContentFilterType.ContainsWhere;
         
         public IContentExpression List { get; private set; }
 

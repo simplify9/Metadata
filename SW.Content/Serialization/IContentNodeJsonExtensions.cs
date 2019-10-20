@@ -59,5 +59,16 @@ namespace SW.Content
         {
             return CreateJToken(contentNode, ListNode<object>.Empty);
         }
+         
+        public static object ToObject(this IContentNode contentNode, Type targetType)
+        {
+            if (contentNode == null) throw new ArgumentNullException(nameof(contentNode));
+            return ToJson(contentNode).ToObject(targetType);
+        }
+
+        public static T ToObject<T>(this IContentNode contentNode)
+        {
+            return (T)contentNode.ToObject(typeof(T));
+        }
     }
 }
