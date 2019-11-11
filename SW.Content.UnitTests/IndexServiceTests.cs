@@ -105,6 +105,7 @@ namespace SW.Content.UnitTests
 
             await indexService.Handle(cmd3);
             var paths = dbc.Set<DbDocSourcePath>().Select(p => p).Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArray();
+            var tokens = dbc.Set<DbDocToken>().Select(t => t).ToArray();
 
 
              Assert.AreEqual(1, paths.Length);

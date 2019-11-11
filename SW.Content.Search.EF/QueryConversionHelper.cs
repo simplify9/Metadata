@@ -64,6 +64,10 @@ namespace SW.Content.Search.EF
 
                 switch (line.Comparison)
                 {
+                    case SearchQuery.Op.NotEquals:
+                        valueComp = Expression.NotEqual(left, constant);
+                        break;
+
                     case SearchQuery.Op.Equals:
                         valueComp = Expression.Equal(left, constant);
                         break;
