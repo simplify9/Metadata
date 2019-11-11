@@ -124,21 +124,22 @@ namespace SW.Content.Search.EF
 
         public async Task SaveTokens(DocumentToken[] tokens)
         {
-
+            //using (var transaction = _dbc.Database.BeginTransaction())
+            //{
             var docs = await BuildDocumentSetQueryable(tokens.Select(t => t.Source).Distinct())
                 .Include(d => d.Tokens)
                 .ToArrayAsync();
-                //.Include(d => d.Tokens.Select(t => t.Path));
+            //.Include(d => d.Tokens.Select(t => t.Path));
 
             // ensure paths
             var types = tokens.Select(t => t.Source.Type.Name).Distinct();
             var paths = await _dbc.Set<DbDocSourcePath>()
                 .Where(p => types.Contains(p.DocumentType))
                 .ToArrayAsync();
-            
+
             foreach (var t in tokens)
             {
-                
+
                 var doc = GetOrCreateDoc(t);
                 var path = GetOrCreatePath(t);
                 var pathString = t.SourcePath.Path.ToString();
@@ -158,7 +159,7 @@ namespace SW.Content.Search.EF
 
                     doc.Tokens.Add(dbToken);
                 }
-                
+
                 dbToken.LastUpdatedOn = DateTime.UtcNow;
 
                 dbToken.ValueAsAny = null;
@@ -175,12 +176,12 @@ namespace SW.Content.Search.EF
                     else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
                     else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
                 }
-
-
-
             }
 
             await _dbc.SaveChangesAsync();
+
+            //    transaction.Commit();
+            //}
         }
 
         public async Task DeleteDocuments(DocumentSource[] sources)

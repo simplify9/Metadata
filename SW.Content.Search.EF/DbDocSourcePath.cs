@@ -13,5 +13,10 @@ namespace SW.Content.Search.EF
         public string PathString { get; set; }
         
         public DateTime CreatedOn { get; set; }
+
+        public override string ToString()
+        {
+            return PathString;
+        }
     }
 }

@@ -54,7 +54,7 @@ namespace SW.Content.UnitTests
         }
 
         [TestMethod]
-        public async Task Test_IndexService2()
+        public async Task Test_IndexServiceNeverDuplicatesPathMasterRecords()
         {
             var _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
@@ -74,14 +74,9 @@ namespace SW.Content.UnitTests
                 {
                     Number = "0001"
                 },
-                AssignedTo = new ContainerDto.CarrierDto { Code = "aby", Name = "name" }
-                ,
-              
+                AssignedTo = new ContainerDto.CarrierDto { Code = "aby", Name = "name" },
             };
-
-
             var cmd = indexService.CreateUpdateCommand("0001", container);
-
             await indexService.Handle(cmd);
 
             var attchs = new List<AttachmentDto>();
@@ -90,25 +85,25 @@ namespace SW.Content.UnitTests
                 Type = "invoice",
                 DownloadUrl = "hdhjdhjhsa"
             });
-           
             container.Attachments = attchs.ToArray();
             var cmd2 = indexService.CreateUpdateCommand("0001", container);
-
-            container.Attachments = attchs.ToArray();
+            await indexService.Handle(cmd2);
 
             attchs.Add(new AttachmentDto
             {
                 Type = "invoice3",
                 DownloadUrl = "hdhjdhjhsa3"
             });
+            container.Attachments = attchs.ToArray();
             var cmd3 = indexService.CreateUpdateCommand("0001", container);
-
             await indexService.Handle(cmd3);
             var paths = dbc.Set<DbDocSourcePath>().Select(p => p).Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArray();
             var tokens = dbc.Set<DbDocToken>().Select(t => t).ToArray();
 
 
-             Assert.AreEqual(1, paths.Length);
+            // load paths from database
+            //var paths = await dbc.Set<DbDocSourcePath>().Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArrayAsync();
+            Assert.AreEqual(1, paths.Length);
 
         }
 
