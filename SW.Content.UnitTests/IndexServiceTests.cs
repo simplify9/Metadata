@@ -97,9 +97,12 @@ namespace SW.Content.UnitTests
             container.Attachments = attchs.ToArray();
             var cmd3 = indexService.CreateUpdateCommand("0001", container);
             await indexService.Handle(cmd3);
+            var paths = dbc.Set<DbDocSourcePath>().Select(p => p).Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArray();
+            var tokens = dbc.Set<DbDocToken>().Select(t => t).ToArray();
+
 
             // load paths from database
-            var paths = await dbc.Set<DbDocSourcePath>().Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArrayAsync();
+            //var paths = await dbc.Set<DbDocSourcePath>().Where(p=>p.PathString == "$.Attachments.[].DownloadUrl").ToArrayAsync();
             Assert.AreEqual(1, paths.Length);
 
         }

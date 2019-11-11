@@ -12,6 +12,7 @@ namespace SW.Content.Search
         public enum Op
         {
             Equals,
+            NotEquals,
             GreaterThan,
             GreaterThanOrEquals,
             LessThan,
