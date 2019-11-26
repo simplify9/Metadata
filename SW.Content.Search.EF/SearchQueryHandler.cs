@@ -36,49 +36,47 @@ namespace SW.Content.Search.EF
         {
             if (query == null) throw new ArgumentNullException(nameof(query));
 
+            // base query
+
             var docTypeName = query.DocumentType.Name;
-            //var paths = await _dbc.Set<DbDocSourcePath>()
-            //    .Where(row => row.DocumentType == docTypeName)
-            //    .ToDictionaryAsync(o => o.PathString);
+            IQueryable<DbDoc> q = _dbc.Set<DbDoc>().Where(d => d.SourceType == docTypeName);
 
-            // create a sortable model
+            // compose where
 
-            var sortPath = query.SortByField.ToString();
-            IQueryable<DocSortValue> q = _dbc.Set<DbDoc>()
-                .Select(d => new DocSortValue
-                {
-                    Doc = d,
-                    OrderBy = d.Tokens
-                        .Where(t => t.Path.PathString == sortPath)
-                        .FirstOrDefault()
-                });
-            
-            // query filters
-            
-            var p = Expression.Parameter(typeof(DocSortValue));
+            var p = Expression.Parameter(typeof(DbDoc));
             Expression body = Expression.Constant(true);
             foreach (var line in query.QueryLines)
             {
-                var tokenList = Expression.PropertyOrField(
-                    Expression.PropertyOrField(p, nameof(DocSortValue.Doc)),
-                    nameof(DbDoc.Tokens));
-
+                var tokenList = Expression.PropertyOrField(p, nameof(DbDoc.Tokens));
                 var callAny = Expression.Call(_anyMethod, tokenList, QueryConversionHelper.BuildCriteriaExpr(line));
                 body = Expression.AndAlso(body, callAny);
             }
 
-            var where = Expression.Lambda<Func<DocSortValue, bool>>(body, p);
-            q = q.Where(where).Where(d => d.Doc.SourceType == docTypeName);
+            var where = Expression.Lambda<Func<DbDoc, bool>>(body, p);
+            q = q.Where(where);
             
-            // apply sorting and pagination
+            // evaluate count
 
-            q = QueryConversionHelper.BuildSortBy(query, q);
             var count = await q.CountAsync();
-            var matches = await q.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
             
+            // apply order by
+
+            var sortPath = query.SortByField.ToString();
+            var tokenQuery = _dbc.Set<DbDocToken>().Where(t => t.Path.PathString == sortPath);
+            var qSortable = q.GroupJoin(tokenQuery, 
+                    d => d.Id, 
+                    t => t.Document.Id, 
+                    (d,t) => new DocSortValue { Doc = d, OrderBy = t.FirstOrDefault() });
+            qSortable = QueryConversionHelper.BuildSortBy(query, qSortable);
+            
+            // apply pagination
+
+            var matches = await qSortable.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
             return new SearchQueryResult<T>(matches
                 .Select(m => JsonUtil.Deserialize<T>(m.Doc.BodyData)).ToArray(), 
                 count);
+
+            
         }
     }
 }
