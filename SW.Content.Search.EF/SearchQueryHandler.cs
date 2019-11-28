@@ -41,7 +41,7 @@ namespace SW.Content.Search.EF
             docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
             schemaName = docTokenModel.Relational().Schema;
             docTokenTableName = docTokenModel.Relational().TableName;
-            docModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
+            docModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDoc));
             docTableName = docModel.Relational().TableName;
         }
         
