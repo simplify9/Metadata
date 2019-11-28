@@ -23,7 +23,7 @@ namespace SW.Content.UnitTests
 
             var line = new SearchQuery.Line(ContentPath.Parse("$.Number.Value"), SearchQuery.Op.AnyOf, list);
 
-            var expr = QueryConversionHelper.BuildCriteriaExpr(line);
+            //var expr = QueryConversionHelper.BuildCriteriaExpr(line);
 
         }
     }

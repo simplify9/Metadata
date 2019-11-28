@@ -20,9 +20,9 @@ namespace SW.Content.Search.EF
             token.ToTable("DocTokens", schemaName);
             token.HasKey(t => t.Id);
             token.HasOne(t => t.Path).WithMany();
-            token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
+           // token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
             token.Property(t => t.ValueAsAny).IsUnicode(true).HasMaxLength(512);
-            token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
+            //token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
             
             var path = b.Entity<DbDocSourcePath>();
             path.ToTable("DocPaths", schemaName);

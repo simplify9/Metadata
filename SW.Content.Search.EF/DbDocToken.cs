@@ -14,13 +14,13 @@ namespace SW.Content.Search.EF
 
         public int Offset { get; set; }
 
-        public string ValueAsString { get; set; }
+        //public string ValueAsString { get; set; }
 
-        public decimal? ValueAsNumber { get; set; }
+        //public decimal? ValueAsNumber { get; set; }
 
-        public bool? ValueAsBoolean { get; set; }
+        //public bool? ValueAsBoolean { get; set; }
 
-        public DateTime? ValueAsDateTime { get; set; }
+        //public DateTime? ValueAsDateTime { get; set; }
 
         public string ValueAsAny { get; set; }
 
