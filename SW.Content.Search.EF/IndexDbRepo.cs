@@ -163,18 +163,18 @@ namespace SW.Content.Search.EF
                 dbToken.LastUpdatedOn = DateTime.UtcNow;
 
                 dbToken.ValueAsAny = null;
-                dbToken.ValueAsBoolean = null;
-                dbToken.ValueAsDateTime = null;
-                dbToken.ValueAsNumber = null;
-                dbToken.ValueAsString = null;
+                //dbToken.ValueAsBoolean = null;
+                //dbToken.ValueAsDateTime = null;
+                //dbToken.ValueAsNumber = null;
+                //dbToken.ValueAsString = null;
 
                 if (!(t.Normalized is ContentNull))
                 {
                     dbToken.ValueAsAny = ((IContentPrimitive)t.Raw).CreateMatchKey();
-                    if (t.Normalized is ContentNumber n) dbToken.ValueAsNumber = n.Value;
-                    else if (t.Normalized is ContentDateTime dt) dbToken.ValueAsDateTime = dt.Value;
-                    else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
-                    else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
+                    //if (t.Normalized is ContentNumber n) dbToken.ValueAsNumber = n.Value;
+                    //else if (t.Normalized is ContentDateTime dt) dbToken.ValueAsDateTime = dt.Value;
+                    //else if (t.Normalized is ContentBoolean b) dbToken.ValueAsBoolean = b.Value;
+                    //else if (t.Normalized is ContentText text) dbToken.ValueAsString = text.Value.ToLowerInvariant();
                 }
             }
 
