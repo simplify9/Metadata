@@ -20,5 +20,15 @@ namespace SW.Eval.Binding
         public IEnumerator<KeyValuePair<PayloadPath, IPayload>> GetEnumerator() => pairs.GetEnumerator();
         
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IPayload ValueOf(PayloadPath path)
+        {
+            return path.Length < 1
+                ? this
+                : (pairs
+                    .Where(p => path.First().Equals(p.Key.First()))
+                    .Select(p => p.Value).FirstOrDefault() ?? NoPayload.Singleton)
+                        .ValueOf(path.Sub(1));
+        }
     }
 }

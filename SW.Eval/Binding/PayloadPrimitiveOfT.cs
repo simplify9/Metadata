@@ -37,7 +37,12 @@ namespace SW.Eval.Binding
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IPayload<K> Map<K>(Func<TValue, K> map) => new PayloadPrimitive<K>(map(Value));
-        
+
+        public IPayload ValueOf(PayloadPath path)
+        {
+            return path.Length < 1 ? this : (IPayload)NoPayload<TValue>.Singleton;
+        }
+
         public static bool operator ==(PayloadPrimitive<TValue> base1, PayloadPrimitive<TValue> base2)
         {
             return EqualityComparer<PayloadPrimitive<TValue>>.Default.Equals(base1, base2);

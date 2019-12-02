@@ -6,7 +6,7 @@ using System.Text;
 namespace SW.Eval.UnitTests
 {
     [TestClass]
-    public class EPathTests
+    public class PayloadPathTests
     {
         [TestMethod]
         public void Test_PathToString()

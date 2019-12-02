@@ -32,6 +32,7 @@ namespace SW.Eval.Binding
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        
+
+        public IPayload ValueOf(PayloadPath path) => this;
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace SW.Eval.Binding
 {
+    [DebuggerDisplay("[---]")]
     public class NoPayload : NoPayload<object>
     {
         public NoPayload()
@@ -14,6 +16,7 @@ namespace SW.Eval.Binding
         
     }
 
+    [DebuggerDisplay("[---]")]
     public class NoPayload<T> : INoPayload, IPayload<T>
     {
         public static NoPayload<T> Singleton { get; } = new NoPayload<T>();
@@ -41,5 +44,7 @@ namespace SW.Eval.Binding
         {
             return NoPayload<T1>.Singleton;
         }
+
+        public IPayload ValueOf(PayloadPath path) => this;
     }
 }

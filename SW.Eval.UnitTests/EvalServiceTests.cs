@@ -9,24 +9,37 @@ using System.Text;
 namespace SW.Eval.UnitTests
 {
     [TestClass]
-    public class PayloadReaderTests
+    public class EvalServiceTests
     {
+        readonly EvalService eval;
+
+        public EvalServiceTests()
+        {
+            eval = new EvalService(new[] { new FromJToken() }, new[] { new ToJToken() });
+        }
 
         [TestMethod]
         public void Test_Evaluation()
         {
             var employee = Employee.Sample;
-
-            var reader = new PayloadReader(new[] { new FromJToken() });
-            var converter = new PayloadConverter(new[] { new ToJToken() });
-
-            var payload = reader.Read(employee);
+            
+            var payload = eval.Read(employee);
             Assert.IsInstanceOfType(payload, typeof(IObject));
 
-            var result = converter.TryConvert(payload, out Employee clone);
-            Assert.IsNull(result);
+            var error = eval.TryConvert(payload, out Employee clone);
+            Assert.IsNull(error);
 
             Assert.AreEqual(employee.ContractType, clone.ContractType);
+
+            var jsonText = JsonConvert.SerializeObject(employee);
+
+            var jToken = JsonConvert.DeserializeObject<JToken>(jsonText);
+
+            payload = eval.Read(jToken);
+
+            var namePayload = payload.ValueOf("$.Name");
+            eval.TryConvert(namePayload, out string s);
+            Assert.AreEqual(employee.Name, s);
 
             //payload.ValueOf("$.Name").
 
@@ -70,19 +83,28 @@ namespace SW.Eval.UnitTests
         [TestMethod]
         public void Test_Cycles()
         {
-            //var o = new TypeWithCycles();
-            //o.Self = o;
-            //o.MyProperty = 5;
-            //o.Child = new Sub1
-            //{
-            //    Parent = o,
-            //    SubChild = new Sub1
-            //    {
-            //        Parent = o,
-            //        Prop1 = 7,
-            //        SubChild = new Sub1 { }
-            //    }
-            //};
+
+            var o = new TypeWithCycles();
+            o.Self = o;
+            o.MyProperty = 5;
+            o.Child = new Sub1
+            {
+                Parent = o,
+                SubChild = new Sub1
+                {
+                    Parent = o,
+                    Prop1 = 7,
+                    SubChild = new Sub1 { }
+                }
+            };
+
+            var payload = eval.Read(o);
+            
+            var v = payload.ValueOf("$.Child");
+            Assert.IsInstanceOfType(v, typeof(IObject));
+            
+            v = payload.ValueOf("$.Child.SubChild");
+            Assert.IsInstanceOfType(v, typeof(IObject));
 
             //var c = ContentFactory.Default.CreateFrom(o);
 

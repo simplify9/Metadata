@@ -21,8 +21,12 @@ namespace SW.Eval
         {
             return (data as IEnumerable<KeyValuePair<PayloadPath,IPayload>>).GetEnumerator();
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IPayload ValueOf(PayloadPath path)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

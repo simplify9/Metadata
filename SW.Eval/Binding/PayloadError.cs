@@ -7,32 +7,34 @@ namespace SW.Eval.Binding
 {
     
 
-    public class PayloadError : IPayloadError, IPayload
+    public class PayloadError : PayloadError<object>
     {
         
-        public string Error { get; }
+        public PayloadError(string error): base(error) { }
         
+    }
 
-        public PayloadError(string error) { Error = error; }
-        
+    public class PayloadError<T>: IPayloadError, IPayload<T>
+    {
+        public PayloadError(string error)
+        {
+            Error = error;
+        }
+
+        public string Error { get; }
+
+        public T Value => default;
+
+        public IPayload<K> Map<K>(Func<T, K> map) => new PayloadError<K>(Error);
+
         public IEnumerator<KeyValuePair<PayloadPath, IPayload>> GetEnumerator()
         {
             yield break;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IPayload ValueOf(PayloadPath path) => this;
         
-    }
-
-    public class PayloadError<T>: PayloadError, IPayload<T>
-    {
-        public PayloadError(string error) : base(error)
-        {
-
-        }
-
-        public T Value => default;
-
-        public IPayload<K> Map<K>(Func<T, K> map) => new PayloadError<K>(Error);
     }
 }
