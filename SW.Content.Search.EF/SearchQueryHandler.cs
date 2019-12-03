@@ -49,8 +49,8 @@ namespace SW.Content.Search.EF
         {
             if (query == null) throw new ArgumentNullException(nameof(query));
 
-            var pathes = await _dbc.Set<DbDocSourcePath>().ToListAsync();
-           string stringQuery =  SqlResolver.ResolveSqlText(query,(p)=>pathes.FirstOrDefault(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
+            var pathes = await _dbc.Set<DbDocSourcePath>().Where(p=>p.DocumentType==query.DocumentType.Name).ToListAsync();
+            string stringQuery =  SqlResolver.ResolveSqlText(query,(p)=>pathes.FirstOrDefault(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
             IQueryable<DbDoc> q = _dbc.Set<DbDoc>().FromSql(stringQuery);
             // compose where
 
