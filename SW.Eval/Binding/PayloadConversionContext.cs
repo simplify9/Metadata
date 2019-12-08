@@ -54,7 +54,7 @@ namespace SW.Eval.Binding
             if (payload == null) throw new ArgumentNullException(nameof(payload));
             exactType = exactType ?? typeof(T);
 
-            if (payload is IPayloadError pError) return new PayloadError<T>(pError.Error);
+            if (payload is IPayloadError pError) return new PayloadError<T>(pError.Errors);
             if (exactType == typeof(object))
             {
                 if (payload is IPrimitive prim) return Convert<T>(payload, prim.GetValue().GetType());

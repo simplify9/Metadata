@@ -7,7 +7,7 @@ using System.Text;
 
 namespace SW.Eval.Binding
 {
-    public class PayloadPrimitive<TValue> : IPayload<TValue>, IPayload, IPrimitive, IEquatable<PayloadPrimitive<TValue>>
+    public class PayloadPrimitive<TValue> : IPayload<TValue>, IPrimitive, IEquatable<PayloadPrimitive<TValue>>
     {
         public TValue Value { get; }
 

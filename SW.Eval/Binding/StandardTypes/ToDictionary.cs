@@ -34,7 +34,7 @@ namespace SW.Eval.Binding.StandardTypes
                 var pairValue = ctx.Convert<TItem>(pair.Value);
                 if (pairValue is IPayloadError pError)
                 {
-                    return new PayloadError<Dictionary<string, TItem>>(pError.Error);
+                    return new PayloadError<Dictionary<string, TItem>>(pError.Errors);
                 }
                 d.Add(pair.Key, pairValue.Value);
             }

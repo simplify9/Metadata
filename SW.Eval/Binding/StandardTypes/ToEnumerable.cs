@@ -28,7 +28,7 @@ namespace SW.Eval.Binding.StandardTypes
                 var convertedItem = ctx.Convert<TItem>(item);
                 if (convertedItem is IPayloadError pError)
                 {
-                    return new PayloadError<HashSet<TItem>>(pError.Error);
+                    return new PayloadError<HashSet<TItem>>(pError.Errors);
                 }
                 hashSet.Add(convertedItem.Value);
             }
@@ -46,7 +46,7 @@ namespace SW.Eval.Binding.StandardTypes
                 var convertedItem = ctx.Convert<TItem>(item);
                 if (convertedItem is IPayloadError pError)
                 {
-                    return new PayloadError<List<TItem>>(pError.Error);
+                    return new PayloadError<List<TItem>>(pError.Errors);
                 }
                 container.Add(convertedItem.Value);
             }

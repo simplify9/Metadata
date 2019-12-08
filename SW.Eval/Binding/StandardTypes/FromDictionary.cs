@@ -12,7 +12,7 @@ namespace SW.Eval.Binding.StandardTypes
     {
         static IPayload Read<T>(PayloadReaderContext ctx, IEnumerable<KeyValuePair<string, T>> source)
             
-            => new PayloadObject(source.Select(pair => 
+            => PayloadObject.Combine(source.Select(pair => 
                 new KeyValuePair<PayloadPath, IPayload>(
                     PayloadPath.Root.Append(pair.Key),
                     ctx.CreateSub(source).Read(pair.Value))));

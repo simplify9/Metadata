@@ -6,7 +6,7 @@ namespace SW.Eval
 {
     public interface IPayloadError : INoPayload
     { 
-        string Error { get; }
+        string[] Errors { get; }
     }
 
     public interface IPayloadError<T> : IPayloadError, IPayload<T>

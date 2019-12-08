@@ -33,10 +33,7 @@ namespace SW.Eval.Binding.StandardTypes
         
         static IPayload Read<TItem>(PayloadReaderContext ctx, IEnumerable<TItem> source)
         {
-            return new PayloadArray(source.Select(
-                (v, i) =>
-                    new KeyValuePair<PayloadPath, IPayload>(PayloadPath.Root.Append(i),
-                        ctx.CreateSub(source).Read(v))));
+            return PayloadArray.Combine(source.Select(v => ctx.CreateSub(source).Read(v)));
         }
     }
 }

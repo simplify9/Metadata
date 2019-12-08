@@ -35,7 +35,7 @@ namespace SW.Eval.Binding.NewtonsoftJson
             {
                 var jProps = jObject as IEnumerable<KeyValuePair<string, JToken>>;
 
-                return new PayloadObject(jProps
+                return PayloadObject.Combine(jProps
                     .Select(pair =>
                         new KeyValuePair<PayloadPath, IPayload>(
                             PayloadPath.Root.Append(pair.Key), 
@@ -44,11 +44,7 @@ namespace SW.Eval.Binding.NewtonsoftJson
 
             else if (jToken is JArray jArray)
             {
-                return new PayloadArray(jArray
-                    .Select((e, i) => 
-                        new KeyValuePair<PayloadPath, IPayload>(
-                            PayloadPath.Root.Append(i),
-                            ctx.Read(e))));
+                return PayloadArray.Combine(jArray.Select(e => ctx.Read(e)));
             }
 
             else if (jToken is JValue jValue)

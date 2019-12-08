@@ -18,7 +18,7 @@ namespace SW.Eval.Binding.StandardTypes
         {
             var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
             var propReaders = props.Select(prop => BuildPropertyReader<T>(prop)).ToArray();
-            return (ctx, poco) => new PayloadObject(propReaders.Select(r => r(ctx, poco)));
+            return (ctx, poco) => PayloadObject.Combine(propReaders.Select(r => r(ctx, poco)));
         }
         
         static PropertyReader<T> BuildPropertyReader<T>(PropertyInfo prop)

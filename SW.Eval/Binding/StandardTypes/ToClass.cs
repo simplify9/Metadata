@@ -30,7 +30,7 @@ namespace SW.Eval.Binding.StandardTypes
                     var converted = ctx.ConvertUntyped(propValuePayload, prop.PropertyType);
                     if (converted is IPrimitive prim) prop.SetValue(o, prim.GetValue());
                     else if (converted is INull) prop.SetValue(o, null);
-                    else if (converted is IPayloadError pError) return new PayloadError<TTo>(pError.Error);
+                    else if (converted is IPayloadError pError) return new PayloadError<TTo>(pError.Errors);
                 }
 
                 return new PayloadPrimitive<TTo>((TTo)o);

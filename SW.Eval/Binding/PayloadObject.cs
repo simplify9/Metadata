@@ -10,9 +10,16 @@ namespace SW.Eval.Binding
     {
         readonly IEnumerable<KeyValuePair<PayloadPath, IPayload>> pairs;
         
+        public static IPayload Combine(IEnumerable<KeyValuePair<PayloadPath, IPayload>> pairs)
+        {
+            var errors = pairs.Select(p => p.Value).OfType<IPayloadError>();
+            if (errors.Any()) return new PayloadError(errors);
+            return new PayloadObject(pairs);
+        }
+
         public IEnumerable<KeyValuePair<string, IPayload>> Properties => this.ObjectProperties();
 
-        public PayloadObject(IEnumerable<KeyValuePair<PayloadPath, IPayload>> pairs)
+        PayloadObject(IEnumerable<KeyValuePair<PayloadPath, IPayload>> pairs)
         {
             this.pairs = pairs ?? throw new ArgumentNullException(nameof(pairs));
         }

@@ -72,7 +72,7 @@ namespace SW.Eval
             var r = ctx.Convert<T>(source);
             converted = r.Value;
             return r is IPayloadError<T> badPayload
-                ? badPayload.Error
+                ? string.Join(",\n\r", badPayload.Errors)
                 : null;
         }
     }

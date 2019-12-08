@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SW.Eval.Binding
@@ -11,21 +12,40 @@ namespace SW.Eval.Binding
     {
         
         public PayloadError(string error): base(error) { }
-        
+
+        public PayloadError(IEnumerable<string> errors) : base(errors)
+        {
+            
+        }
+
+        public PayloadError(IEnumerable<IPayloadError> errors) : base(errors)
+        {
+            
+        }
     }
 
     public class PayloadError<T>: IPayloadError, IPayload<T>
     {
         public PayloadError(string error)
         {
-            Error = error;
+            Errors = new[] { error };
         }
 
-        public string Error { get; }
+        public PayloadError(IEnumerable<string> errors)
+        {
+            Errors = errors.ToArray();
+        }
+
+        public PayloadError(IEnumerable<IPayloadError> errors)
+        {
+            Errors = errors.SelectMany(err => err.Errors).ToArray();
+        }
+
+        public string[] Errors { get; }
 
         public T Value => default;
 
-        public IPayload<K> Map<K>(Func<T, K> map) => new PayloadError<K>(Error);
+        public IPayload<K> Map<K>(Func<T, K> map) => new PayloadError<K>(Errors);
 
         public IEnumerator<KeyValuePair<PayloadPath, IPayload>> GetEnumerator()
         {
