@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SW.Eval
 {
@@ -13,14 +14,11 @@ namespace SW.Eval
     {
         
         static readonly DelegateCache readerCache = new DelegateCache();
-
         static readonly DelegateCache convertCache = new DelegateCache();
-
         readonly IPayloadTypeReaderFactory[] readerFactories;
-
         readonly IPayloadTypeConverterFactory[] converterFactories;
 
-        IEnumerable<IPayloadTypeConverterFactory> SortMergeConverters(IEnumerable<IPayloadTypeConverterFactory> additional)
+        static IEnumerable<IPayloadTypeConverterFactory> SortMergeConverters(IEnumerable<IPayloadTypeConverterFactory> additional)
         {
             foreach (var e in additional) yield return e;
             yield return new ToPayload();
@@ -32,7 +30,7 @@ namespace SW.Eval
             yield return new ToClass();
         }
 
-        IEnumerable<IPayloadTypeReaderFactory> SortMergeReaders(IEnumerable<IPayloadTypeReaderFactory> additionalReaders)
+        static IEnumerable<IPayloadTypeReaderFactory> SortMergeReaders(IEnumerable<IPayloadTypeReaderFactory> additionalReaders)
         {
             foreach (var e in additionalReaders) yield return e;
             yield return new FromPayload();
@@ -65,7 +63,6 @@ namespace SW.Eval
         public string TryConvert<T>(IPayload source, out T converted)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-
             converted = default;
             if (source is INull) return null;
             var ctx = new PayloadConversionContext(convertCache, converterFactories);
@@ -74,6 +71,40 @@ namespace SW.Eval
             return r is IPayloadError<T> badPayload
                 ? string.Join(",\n\r", badPayload.Errors)
                 : null;
+        }
+
+        public async Task<IPayload> Evaluate(IEvalExpression query, IPayload input, EvalDataTaskFactory taskFactory)
+        {
+            // create eval context
+            var ctx = new EvalContext(new LexicalScope("$", input));
+
+            var result = query.Run(ctx);
+
+            // loop while expression has non-materialized data requests
+            while (result is EvalInProgress inProgress)
+            {
+                // group requests by func name
+                var batchRequests = inProgress.ReadyToRun
+                    .GroupBy(r => r.DataFuncName)
+                    .Select(batch =>
+                        new DataRequest(batch.Key,
+                            batch.SelectMany(item => item.Queries)));
+
+                // run all
+                var responses = await Task.WhenAll(batchRequests.Select(r => taskFactory(r)));
+
+                // reflect response to context
+                foreach (var response in responses.SelectMany(rSet => rSet))
+                {
+                    ctx = ctx.Materialize(response);
+                }
+
+                // re-evaluate after results
+                result = query.Run(ctx);
+            }
+
+            // unwrap final expression result
+            return (result as EvalComplete).Results.First();
         }
     }
 }

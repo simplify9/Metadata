@@ -36,5 +36,10 @@ namespace SW.Eval
 
             return payload.ValueOf(PayloadPath.Parse(pathString));
         }
+
+        public static PayloadPair MakePair(this IPayload p, PayloadPath path)
+        {
+            return new PayloadPair(path, p);
+        }
     }
 }

@@ -4,11 +4,13 @@ using System.Text;
 
 namespace SW.Eval
 {
-    public class ScopeVarExpression : IEvalExpression
+    public class EVar : IEvalExpression
     {
+        
+
         public string VarName { get; private set; }
 
-        public ScopeVarExpression(string varName)
+        public EVar(string varName)
         {
             VarName = varName ?? throw new ArgumentNullException(nameof(varName));
         }
@@ -16,15 +18,16 @@ namespace SW.Eval
         public override string ToString() => VarName;
         
         public override bool Equals(object obj) => 
-            obj is ScopeVarExpression scopeVar && 
+            obj is EVar scopeVar && 
                 VarName == scopeVar.VarName;
         
         public override int GetHashCode() => VarName.GetHashCode();
 
-        public IEnumerable<IEvalExpression> GetChildren() => Array.Empty<IEvalExpression>();
+        public IEnumerable<EvalArg> GetArgs() => Array.Empty<EvalArg>();
 
-        public IEvalState ComputeState(EvalContext ctx) 
-            => ctx.Apply(_ => 
-                new EvalComplete(ctx.ScopeVars.GetValue(VarName)));
+        public EvalStateMapper GetMapper() => 
+            (ctx, args) => 
+                new EvalComplete(ctx.ScopeVars.GetValue(VarName));
+        
     }
 }

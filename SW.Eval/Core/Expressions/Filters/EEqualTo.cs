@@ -5,32 +5,31 @@ using System.Text;
 
 namespace SW.Eval
 {
-    public class EqualToFilter : EvalFilterBase, IEquatable<EqualToFilter>
+    public class EEqualTo : EvalFilterBase, IEquatable<EEqualTo>
     {
         public IEvalExpression Left { get; private set; }
 
         public IEvalExpression Right { get; private set; }
         
-        public EqualToFilter(IEvalExpression left, IEvalExpression right)
+        public EEqualTo(IEvalExpression left, IEvalExpression right)
         {
             Left = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-        public override bool IsMatch(IReadOnlyDictionary<IEvalExpression, IPayload> args)
-            => args[Left].Equals(args[Right]);
+        public override bool IsMatch(IPayload[] args) => args[0].Equals(args[1]);
 
-        public override IEnumerable<IEvalExpression> GetChildren()
+        public override IEnumerable<EvalArg> GetArgs()
         {
-            yield return Left;
-            yield return Right;
+            yield return new EvalArg("left", Left);
+            yield return new EvalArg("right", Right);
         }
 
         public override string ToString() => $"{Left} EQUALS {Right}";
         
-        public override bool Equals(object obj) => Equals(obj as EqualToFilter);
+        public override bool Equals(object obj) => Equals(obj as EEqualTo);
         
-        public bool Equals(EqualToFilter other)
+        public bool Equals(EEqualTo other)
             => other != null &&
                     //Type == other.Type &&
                     Left.Equals(other.Left) &&
@@ -47,12 +46,12 @@ namespace SW.Eval
 
         
 
-        public static bool operator ==(EqualToFilter expression1, EqualToFilter expression2)
+        public static bool operator ==(EEqualTo expression1, EEqualTo expression2)
         {
-            return EqualityComparer<EqualToFilter>.Default.Equals(expression1, expression2);
+            return EqualityComparer<EEqualTo>.Default.Equals(expression1, expression2);
         }
 
-        public static bool operator !=(EqualToFilter expression1, EqualToFilter expression2)
+        public static bool operator !=(EEqualTo expression1, EEqualTo expression2)
         {
             return !(expression1 == expression2);
         }

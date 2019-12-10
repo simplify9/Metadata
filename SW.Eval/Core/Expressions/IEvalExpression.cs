@@ -10,8 +10,8 @@ namespace SW.Eval
 
     public interface IEvalExpression
     {
-        IEnumerable<IEvalExpression> GetChildren();
+        IEnumerable<EvalArg> GetArgs();
 
-        IEvalState ComputeState(EvalContext ctx);
+        EvalStateMapper GetMapper();
     }
 }

@@ -7,5 +7,7 @@ namespace SW.Eval
     public interface IEvalState
     {
         IEvalState MergeWith(IEvalState other);
+
+        IEvalState Apply(EvalContext ctx, EvalStateMapper func);
     }
 }

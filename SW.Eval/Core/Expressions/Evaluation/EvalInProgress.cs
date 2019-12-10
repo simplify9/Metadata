@@ -30,5 +30,13 @@ namespace SW.Eval
                 : other is EvalInProgress inProgress
                     ? Append(inProgress.ReadyToRun)
                     : throw new NotSupportedException("Merge not supported");
+
+        public IEvalState Apply(EvalContext ctx, EvalStateMapper func)
+        {
+            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
+            if (func == null) throw new ArgumentNullException(nameof(func));
+
+            return this;
+        }
     }
 }

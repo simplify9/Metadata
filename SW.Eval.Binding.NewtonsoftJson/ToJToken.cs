@@ -73,7 +73,7 @@ namespace SW.Eval.Binding.NewtonsoftJson
 
         static IPayload<JToken> ConvertToken<TFrom>(PayloadConversionContext ctx, IPayload<TFrom> payload)
         {
-            if (payload is IPayloadError pError) return new PayloadError<JToken>(pError.Error); 
+            if (payload is IPayloadError pError) return new PayloadError<JToken>(pError.Errors); 
             if (payload is INull) return new PayloadPrimitive<JToken>(JValue.CreateNull());
             if (payload is IObject obj) return ConvertObject(ctx, payload);
             if (payload is ISet) return ConvertArray(ctx, payload);

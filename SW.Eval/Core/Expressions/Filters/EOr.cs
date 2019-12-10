@@ -4,14 +4,14 @@ using System.Text;
 
 namespace SW.Eval
 {
-    public class OrFilter : BinaryFilterBase
+    public class EOr : BinaryFilterBase
     {
         string Enclose(IEvalFilter exp)
-            => exp is AndFilter
+            => exp is EAnd
                 ? $"({exp})"
                 : exp.ToString();
         
-        public OrFilter(IEvalFilter left, IEvalFilter right) : base(left, right)
+        public EOr(IEvalFilter left, IEvalFilter right) : base(left, right)
         {
 
         }

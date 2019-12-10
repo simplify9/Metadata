@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace SW.Eval
 {
-    public class AndFilter : BinaryFilterBase
+    public class EAnd : BinaryFilterBase
     {
         string Enclose(IEvalFilter exp)
-            => exp is OrFilter
+            => exp is EOr
                 ? $"({exp})"
                 : exp.ToString();
 
-        public AndFilter(IEvalFilter left, IEvalFilter right) : base(left, right)
+        public EAnd(IEvalFilter left, IEvalFilter right) : base(left, right)
         {
 
         }

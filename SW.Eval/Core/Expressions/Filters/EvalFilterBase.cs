@@ -9,15 +9,16 @@ namespace SW.Eval
     public abstract class EvalFilterBase : IEvalFilter, IEvalExpression
     {
         
-        public abstract bool IsMatch(IReadOnlyDictionary<IEvalExpression,IPayload> input);
+        public abstract bool IsMatch(IPayload[] input);
         
-        public virtual IEnumerable<IEvalExpression> GetChildren()
+        public virtual IEnumerable<EvalArg> GetArgs()
         {
             yield break;
         }
 
-        public IEvalState ComputeState(EvalContext ctx)
-            => ctx.Apply(args => 
-                new EvalComplete(new PayloadPrimitive<bool>(IsMatch(args))));
+        public EvalStateMapper GetMapper() => 
+            (ctx, args) => 
+                new EvalComplete(new PayloadPrimitive<bool>(IsMatch(args)));
+        
     }
 }

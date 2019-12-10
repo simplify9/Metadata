@@ -12,10 +12,10 @@ namespace SW.Eval
 
         protected abstract bool IsMatch(bool left, bool right);
 
-        public override bool IsMatch(IReadOnlyDictionary<IEvalExpression, IPayload> args)
+        public override bool IsMatch(IPayload[] args)
         {
-            var leftValue = args[Left as IEvalExpression];
-            var rightValue = args[Right as IEvalExpression];
+            var leftValue = args[0];
+            var rightValue = args[1];
             if (!(leftValue is IPayload<bool> leftBool)) return false;
             if (!(rightValue is IPayload<bool> rightBool)) return false;
             return IsMatch(leftBool.Value, rightBool.Value);
@@ -27,10 +27,10 @@ namespace SW.Eval
             Right = right ?? throw new ArgumentNullException(nameof(right));
         }
 
-        public override IEnumerable<IEvalExpression> GetChildren()
+        public override IEnumerable<EvalArg> GetArgs()
         {
-            yield return (IEvalExpression)Left;
-            yield return (IEvalExpression)Right;
+            yield return new EvalArg("left", (IEvalExpression)Left);
+            yield return new EvalArg("right", (IEvalExpression)Right);
         }
         
         public override bool Equals(object obj) => Equals(obj as BinaryFilterBase);

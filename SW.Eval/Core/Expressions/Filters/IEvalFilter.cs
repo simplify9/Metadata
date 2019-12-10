@@ -6,6 +6,6 @@ namespace SW.Eval
 {
     public interface IEvalFilter
     {
-        bool IsMatch(IReadOnlyDictionary<IEvalExpression,IPayload> input);
+        bool IsMatch(IPayload[] input);
     }
 }
