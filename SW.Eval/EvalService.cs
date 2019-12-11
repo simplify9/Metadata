@@ -12,11 +12,25 @@ namespace SW.Eval
 {
     public class EvalService
     {
-        
         static readonly DelegateCache readerCache = new DelegateCache();
         static readonly DelegateCache convertCache = new DelegateCache();
         readonly IPayloadTypeReaderFactory[] readerFactories;
         readonly IPayloadTypeConverterFactory[] converterFactories;
+
+        static EvalDataTaskFactory FlattenExceptions(EvalDataTaskFactory taskFactory)
+            => async (r) =>
+            {
+                try
+                {
+                    return await taskFactory(r);
+                }
+                catch (Exception ex)
+                {
+                    var errorPayload = new PayloadError(ex);
+                    return r.Queries.Select(q => new DataResponse(q.Id, errorPayload)).ToArray();
+                }
+            };
+        
 
         static IEnumerable<IPayloadTypeConverterFactory> SortMergeConverters(IEnumerable<IPayloadTypeConverterFactory> additional)
         {
@@ -53,7 +67,7 @@ namespace SW.Eval
                 Array.Empty<IPayloadTypeConverterFactory>()).ToArray();
         }
 
-        public IPayload Read<T>(T source)
+        public IPayload CreatePayload<T>(T source)
         {
             if (source == null) return PayloadNull.Singleton;
             var ctx = PayloadReaderContext.CreateRoot(readerCache, readerFactories);
@@ -73,15 +87,15 @@ namespace SW.Eval
                 : null;
         }
 
-        public async Task<IPayload> Evaluate(IEvalExpression query, IPayload input, EvalDataTaskFactory taskFactory)
+        public async Task<IPayload> GetQueryResults(IEvalExpression query, IPayload input, EvalDataTaskFactory taskFactory)
         {
             // create eval context
             var ctx = new EvalContext(new LexicalScope("$", input));
 
-            var result = query.Run(ctx);
+            IEvalState result = null;
 
             // loop while expression has non-materialized data requests
-            while (result is EvalInProgress inProgress)
+            while ((result = query.Run(ctx)) is EvalInProgress inProgress)
             {
                 // group requests by func name
                 var batchRequests = inProgress.ReadyToRun
@@ -91,16 +105,15 @@ namespace SW.Eval
                             batch.SelectMany(item => item.Queries)));
 
                 // run all
-                var responses = await Task.WhenAll(batchRequests.Select(r => taskFactory(r)));
+                var responses = await Task.WhenAll(
+                    batchRequests.Select(r => 
+                        FlattenExceptions(taskFactory)(r)));
 
                 // reflect response to context
                 foreach (var response in responses.SelectMany(rSet => rSet))
                 {
                     ctx = ctx.Materialize(response);
                 }
-
-                // re-evaluate after results
-                result = query.Run(ctx);
             }
 
             // unwrap final expression result

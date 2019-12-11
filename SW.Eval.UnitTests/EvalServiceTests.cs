@@ -23,7 +23,7 @@ namespace SW.Eval.UnitTests
         {
             var employee = Employee.Sample;
             
-            var payload = eval.Read(employee);
+            var payload = eval.CreatePayload(employee);
             Assert.IsInstanceOfType(payload, typeof(IObject));
 
             var error = eval.TryConvert(payload, out Employee clone);
@@ -35,7 +35,7 @@ namespace SW.Eval.UnitTests
 
             var jToken = JsonConvert.DeserializeObject<JToken>(jsonText);
 
-            payload = eval.Read(jToken);
+            payload = eval.CreatePayload(jToken);
 
             var namePayload = payload.ValueOf("$.Name");
             eval.TryConvert(namePayload, out string s);
@@ -98,7 +98,7 @@ namespace SW.Eval.UnitTests
                 }
             };
 
-            var payload = eval.Read(o);
+            var payload = eval.CreatePayload(o);
             
             var v = payload.ValueOf("$.Child");
             Assert.IsInstanceOfType(v, typeof(IObject));

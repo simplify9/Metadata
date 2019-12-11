@@ -46,5 +46,15 @@ namespace SW.Eval.Binding
         }
 
         public IPayload ValueOf(PayloadPath path) => this;
+
+        public override bool Equals(object obj)
+        {
+            return obj is INoPayload;
+        }
+
+        public override int GetHashCode()
+        {
+            return 1;
+        }
     }
 }

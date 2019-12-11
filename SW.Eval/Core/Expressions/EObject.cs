@@ -21,10 +21,7 @@ namespace SW.Eval
 
             public override IEnumerable<KeyValuePair<PayloadPath, IPayload>> CreatePairs(IPayload p)
             {
-                if (!(p is INoPayload))
-                {
-                    yield return p.MakePair(PayloadPath.Root.Append(Name));
-                }
+                if (!(p is INoPayload)) yield return p.MakePair(PayloadPath.Root.Append(Name));
             }
 
             public override string ToString() => $"{Name}:{Value}";
@@ -32,11 +29,9 @@ namespace SW.Eval
             public override bool Equals(object obj) 
                 => obj is Attribute a && 
                     Name.Equals(a.Name) && 
-                    Value.Equals(a.Value);
+                        Value.Equals(a.Value);
             
             public override int GetHashCode() => Value.GetHashCode();
-
-            
         }
 
         public class Object : Element
@@ -54,14 +49,34 @@ namespace SW.Eval
             
             public override int GetHashCode() => Value.GetHashCode();
         }
-
         
-
         public Element[] Elements { get; }
-        
+
+        public EObject(params Element[] elements)
+        {
+            Elements = elements;
+        }
+
         public EObject(IEnumerable<Element> elements)
         {
             Elements = elements?.ToArray() ?? throw new ArgumentNullException(nameof(elements));
+        }
+
+        public EObject FlatAppend(IEvalExpression appended)
+        {
+            return new EObject(Elements.Concat(new[] { new Object { Value = appended } }));
+        }
+
+        public EObject Append(string attributeName, IEvalExpression appended)
+        {
+            return new EObject(Elements.Concat(new[] 
+                {
+                    new Attribute
+                    {
+                        Value = appended,
+                        Name = attributeName
+                    }
+                }));
         }
         
         public override string ToString()
@@ -75,11 +90,8 @@ namespace SW.Eval
 
         public override bool Equals(object obj) => Equals(obj as EObject);
         
-        public bool Equals(EObject other) 
-            => other != null &&
-                 Elements.SequenceEqual(other.Elements);
+        public bool Equals(EObject other) => other != null && Elements.SequenceEqual(other.Elements);
         
-
         public override int GetHashCode()
         {
             return 1573927372 + EqualityComparer<Element[]>.Default.GetHashCode(Elements);
@@ -96,10 +108,16 @@ namespace SW.Eval
         public EvalStateMapper GetMapper() =>
             (ctx, args) =>
             {
+                // union all elements
                 var pairs = Enumerable.Zip(Elements, args, (Fragment, Value) => (Fragment, Value))
                     .SelectMany(i => i.Fragment.CreatePairs(i.Value));
 
-                return new EvalComplete(PayloadObject.Combine(pairs));
+                // de-dup and last key prevails
+                var d = new Dictionary<PayloadPath, IPayload>();
+                foreach (var pair in pairs) d[pair.Key] = pair.Value;
+
+                // create object
+                return new EvalComplete(PayloadObject.Combine(d));
             }; 
         
         public static bool operator ==(EObject expression1, EObject expression2)

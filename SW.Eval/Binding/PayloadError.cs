@@ -10,7 +10,11 @@ namespace SW.Eval.Binding
 
     public class PayloadError : PayloadError<object>
     {
-        
+        public PayloadError(Exception ex) : base(ex)
+        {
+
+        }
+
         public PayloadError(string error): base(error) { }
 
         public PayloadError(IEnumerable<string> errors) : base(errors)
@@ -29,6 +33,11 @@ namespace SW.Eval.Binding
         public PayloadError(string error)
         {
             Errors = new[] { error };
+        }
+
+        public PayloadError(Exception ex) : this(ex.ToString())
+        {
+            
         }
 
         public PayloadError(IEnumerable<string> errors)
@@ -55,6 +64,15 @@ namespace SW.Eval.Binding
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IPayload ValueOf(PayloadPath path) => this;
-        
+
+        public override bool Equals(object obj)
+        {
+            return obj is IPayloadError error && Errors.SequenceEqual(error.Errors);
+        }
+
+        public override int GetHashCode()
+        {
+            return 1564055702 + EqualityComparer<string[]>.Default.GetHashCode(Errors);
+        }
     }
 }

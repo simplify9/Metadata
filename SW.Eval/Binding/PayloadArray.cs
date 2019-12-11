@@ -47,5 +47,18 @@ namespace SW.Eval.Binding
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public override bool Equals(object obj)
+        {
+            return obj is PayloadArray array && Items.SequenceEqual(array.Items);
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -653337211;
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<KeyValuePair<PayloadPath, IPayload>>>.Default.GetHashCode(pairs);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEnumerable<IPayload>>.Default.GetHashCode(Items);
+            return hashCode;
+        }
     }
 }

@@ -37,5 +37,19 @@ namespace SW.Eval.Binding
                     .Select(p => p.Value).FirstOrDefault() ?? NoPayload.Singleton)
                         .ValueOf(path.Sub(1));
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is PayloadObject v)) return false;
+            var l = Properties.OrderBy(p => p.Key);
+            var r = v.Properties.OrderBy(p => p.Key);
+            return l.Select(p => p.Key).SequenceEqual(r.Select(p => p.Key)) &&
+                    l.Select(p => p.Value).SequenceEqual(r.Select(p => p.Value));
+        }
+
+        public override int GetHashCode()
+        {
+            return 0;
+        }
     }
 }

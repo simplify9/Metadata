@@ -13,6 +13,7 @@ namespace SW.Eval.Binding
 
         public PayloadPrimitive(TValue value)
         {
+            if (value == null) throw new ArgumentNullException(nameof(value));
             Value = value;
         }
         

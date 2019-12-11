@@ -11,14 +11,25 @@ namespace SW.Eval
 
         public EvalArg[] Arguments { get; }
         
-        public EDataFunc(string funcName, IEnumerable<EvalArg> args)
+        public EDataFunc(string funcName, params EvalArg[] parameters)
         {
-            if (args == null) throw new ArgumentNullException(nameof(args));
+            FuncName = funcName;
+            Arguments = parameters;
+        }
+
+        public EDataFunc(string funcName, IEnumerable<EvalArg> parameters)
+        {
+            if (parameters == null) throw new ArgumentNullException(nameof(parameters));
             FuncName = funcName ?? throw new ArgumentNullException(nameof(funcName));
 
-            Arguments = args.ToArray();
+            Arguments = parameters.ToArray();
         }
         
+        public EDataFunc WithParam(string paramName, IEvalExpression paramExpr)
+        {
+            return new EDataFunc(FuncName, Arguments.Concat(new[] { new EvalArg(paramName, paramExpr) }));
+        }
+
         public IEnumerable<EvalArg> GetArgs() => Arguments;
 
         public EvalStateMapper GetMapper() =>
