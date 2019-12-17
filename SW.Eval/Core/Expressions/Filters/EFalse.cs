@@ -16,7 +16,7 @@ namespace SW.Eval
         
         public override int GetHashCode() => 2049151605;
         
-        public override string ToString() => "FALSE";
+        public override string ToString() => "false";
 
         public override bool IsMatch(IPayload[] input) => false;
 

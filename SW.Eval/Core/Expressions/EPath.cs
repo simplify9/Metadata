@@ -17,7 +17,7 @@ namespace SW.Eval
             Scope = scope ?? throw new ArgumentNullException(nameof(scope));
         }
         
-        public override string ToString() => Path.ToString();
+        public override string ToString() => $"{Scope}{Path.ToString().Substring(1)}";
         
         public override bool Equals(object obj) => Equals(obj as EPath);
         

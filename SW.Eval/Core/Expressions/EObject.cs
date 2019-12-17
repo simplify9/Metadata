@@ -24,7 +24,7 @@ namespace SW.Eval
                 if (!(p is INoPayload)) yield return p.MakePair(PayloadPath.Root.Append(Name));
             }
 
-            public override string ToString() => $"{Name}:{Value}";
+            public override string ToString() => $"{Name}: {Value}";
             
             public override bool Equals(object obj) 
                 => obj is Attribute a && 
@@ -83,7 +83,7 @@ namespace SW.Eval
         {
             var sb = new StringBuilder();
             sb.Append("{");
-            sb.Append(string.Join(",", Elements.Select(i => i.ToString())));
+            sb.Append(string.Join(", ", Elements.Select(i => i.ToString())));
             sb.Append("}");
             return sb.ToString();
         }
@@ -109,8 +109,9 @@ namespace SW.Eval
             (ctx, args) =>
             {
                 // union all elements
-                var pairs = Enumerable.Zip(Elements, args, (Fragment, Value) => (Fragment, Value))
-                    .SelectMany(i => i.Fragment.CreatePairs(i.Value));
+                var pairs = Enumerable
+                    .Zip(Elements, args, (Fragment, Value) => (Fragment, Value))
+                        .SelectMany(i => i.Fragment.CreatePairs(i.Value));
 
                 // de-dup and last key prevails
                 var d = new Dictionary<PayloadPath, IPayload>();

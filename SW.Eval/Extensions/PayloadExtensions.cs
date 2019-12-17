@@ -2,6 +2,7 @@
 using SW.Eval.Binding;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 
@@ -9,7 +10,7 @@ namespace SW.Eval
 {
     using PayloadPair = KeyValuePair<PayloadPath, IPayload>;
 
-    public static class PayloadEnumerableExtensions
+    public static class PayloadExtensions
     {
         
         public static IEnumerable<KeyValuePair<string,IPayload>> ObjectProperties(this IEnumerable<PayloadPair> payload)
@@ -40,6 +41,26 @@ namespace SW.Eval
         public static PayloadPair MakePair(this IPayload p, PayloadPath path)
         {
             return new PayloadPair(path, p);
+        }
+
+        
+
+        public static string GetComparableSequence(this IPrimitive p)
+        {
+            if (p == null) throw new ArgumentNullException(nameof(p));
+
+            if (p is IPayload<string> pStr) return pStr.Value;
+
+            if (p is IPayload<DateTime> pDate) return pDate.Value.ToString("o");
+
+            var v = p.GetValue();
+            if (typeof(IFormattable).IsAssignableFrom(v.GetType()))
+            {
+                var m = ((IFormattable)v).ToString("n6", CultureInfo.InvariantCulture);
+                return $"{m.IndexOf('.').ToString("00")}{m}";
+            }
+
+            return v.ToString();
         }
     }
 }

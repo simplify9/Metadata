@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SW.Eval.Binding;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,6 +7,11 @@ namespace SW.Eval
 {
     public class EConstant : IEvalExpression, IEquatable<EConstant>
     {
+        public static EConstant From<T>(T value)
+        {
+            return new EConstant(new PayloadPrimitive<T>(value));
+        }
+
         public IPayload Constant { get; }
 
         public EConstant(IPayload constant)

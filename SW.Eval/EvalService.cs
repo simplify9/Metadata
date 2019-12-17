@@ -17,12 +17,15 @@ namespace SW.Eval
         readonly IPayloadTypeReaderFactory[] readerFactories;
         readonly IPayloadTypeConverterFactory[] converterFactories;
 
-        static EvalDataTaskFactory FlattenExceptions(EvalDataTaskFactory taskFactory)
+        static EvalDataTaskFactory Decorate(EvalDataTaskFactory taskFactory)
             => async (r) =>
             {
                 try
                 {
-                    return await taskFactory(r);
+                    var responses = await taskFactory(r);
+                    return r.Queries.Select(q =>
+                        responses.FirstOrDefault(rs => rs.RequestId == q.Id) ??
+                            new DataResponse(q.Id, NoPayload.Singleton)).ToArray();
                 }
                 catch (Exception ex)
                 {
@@ -107,7 +110,7 @@ namespace SW.Eval
                 // run all
                 var responses = await Task.WhenAll(
                     batchRequests.Select(r => 
-                        FlattenExceptions(taskFactory)(r)));
+                        Decorate(taskFactory)(r)));
 
                 // reflect response to context
                 foreach (var response in responses.SelectMany(rSet => rSet))

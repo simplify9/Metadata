@@ -6,9 +6,9 @@ namespace SW.Eval
 {
     public abstract class BinaryFilterBase : EvalFilterBase, IEquatable<BinaryFilterBase>
     {
-        public IEvalFilter Left { get; }
+        public IEvalExpression Left { get; }
 
-        public IEvalFilter Right { get; }
+        public IEvalExpression Right { get; }
 
         protected abstract bool IsMatch(bool left, bool right);
 
@@ -21,7 +21,7 @@ namespace SW.Eval
             return IsMatch(leftBool.Value, rightBool.Value);
         }
 
-        protected BinaryFilterBase(IEvalFilter left, IEvalFilter right)
+        protected BinaryFilterBase(IEvalExpression left, IEvalExpression right)
         {
             Left = left ?? throw new ArgumentNullException(nameof(left));
             Right = right ?? throw new ArgumentNullException(nameof(right));
@@ -45,8 +45,8 @@ namespace SW.Eval
         public override int GetHashCode()
         {
             var hashCode = -412577974;
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEvalFilter>.Default.GetHashCode(Left);
-            hashCode = hashCode * -1521134295 + EqualityComparer<IEvalFilter>.Default.GetHashCode(Right);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEvalExpression>.Default.GetHashCode(Left);
+            hashCode = hashCode * -1521134295 + EqualityComparer<IEvalExpression>.Default.GetHashCode(Right);
             return hashCode;
         }
 

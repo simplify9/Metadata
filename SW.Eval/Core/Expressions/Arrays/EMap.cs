@@ -8,25 +8,33 @@ namespace SW.Eval
 {
     public class EMap : IEvalExpression
     {
+        public ExpressionClosure Closure { get; }
+
         public IEvalExpression SourceArray { get; }
 
-        public IEvalExpression MapperExpr { get; }
+        public IEvalExpression MapperExpr => Closure.Body;
 
-        public string ItemVarName { get; }
+        public string ItemVarName => Closure.Parameters[0];
 
-        public string IndexVarName { get; }
+        public string IndexVarName => Closure.Parameters.Length < 2 ? null : Closure.Parameters[1];
 
-        public EMap(IEvalExpression sourceArray, 
-            IEvalExpression mapperExpr,
-            string itemVarName, 
-            string indexVarName = null)
+        public EMap(IEvalExpression sourceArray, ExpressionClosure closure)
         {
+            Closure = closure ?? throw new ArgumentNullException(nameof(closure));
+            
             SourceArray = sourceArray ?? throw new ArgumentNullException(nameof(sourceArray));
-            MapperExpr = mapperExpr ?? throw new ArgumentNullException(nameof(mapperExpr));
-            ItemVarName = itemVarName ?? throw new ArgumentNullException(nameof(itemVarName));
-            IndexVarName = indexVarName;
+
+            if (closure.Parameters.Length < 1)
+            {
+                throw new ArgumentException("Closure must have at least one parameter for item in array", nameof(closure));
+            }
         }
-        
+
+        public override string ToString()
+        {
+            return $"{SourceArray}.map({Closure})";
+        }
+
         public IEnumerable<EvalArg> GetArgs()
         {
             yield return new EvalArg("src", SourceArray, 

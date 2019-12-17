@@ -59,7 +59,7 @@ namespace SW.Eval
         {
             var sb = new StringBuilder();
             sb.Append("[");
-            sb.Append(string.Join(",", Items.Select(i => i.ToString())));
+            sb.Append(string.Join(", ", Items.Select(i => i.ToString())));
             sb.Append("]");
             return sb.ToString();
         }

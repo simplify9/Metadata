@@ -11,21 +11,31 @@ namespace SW.Eval
     {
         public IEvalExpression SourceArray { get; }
 
-        public IEvalExpression MapperExpr { get; }
+        public ExpressionClosure Closure { get; }
 
-        public string ItemVarName { get; }
+        public IEvalExpression MapperExpr => Closure.Body;
 
-        public string IndexVarName { get; }
+        public string ItemVarName => Closure.Parameters[0];
 
-        public EContainsWhere(IEvalExpression sourceArray,
-            IEvalExpression mapperExpr,
-            string itemVarName,
-            string indexVarName = null)
+        public string IndexVarName => Closure.Parameters.Length < 2 ? null : Closure.Parameters[1];
+
+
+        public EContainsWhere(IEvalExpression sourceArray, ExpressionClosure closure)
         {
+            Closure = closure ?? throw new ArgumentNullException(nameof(closure));
+
             SourceArray = sourceArray ?? throw new ArgumentNullException(nameof(sourceArray));
-            MapperExpr = mapperExpr ?? throw new ArgumentNullException(nameof(mapperExpr));
-            ItemVarName = itemVarName ?? throw new ArgumentNullException(nameof(itemVarName));
-            IndexVarName = indexVarName;
+
+            if (closure.Parameters.Length < 1)
+            {
+                throw new ArgumentException("Closure must have at least one parameter for item in array", nameof(closure));
+            }
+            
+        }
+
+        public override string ToString()
+        {
+            return $"{SourceArray}.any({Closure})";
         }
 
         public IEnumerable<EvalArg> GetArgs()

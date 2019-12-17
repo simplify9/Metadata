@@ -27,7 +27,7 @@ namespace SW.Eval
             return !(expression1 == expression2);
         }
 
-        public override string ToString() => "TRUE";
+        public override string ToString() => "true";
         
         public override bool IsMatch(IPayload[] input) => true;
     }

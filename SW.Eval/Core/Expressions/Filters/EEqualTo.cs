@@ -25,7 +25,7 @@ namespace SW.Eval
             yield return new EvalArg("right", Right);
         }
 
-        public override string ToString() => $"{Left} EQUALS {Right}";
+        public override string ToString() => $"{Left} == {Right}";
         
         public override bool Equals(object obj) => Equals(obj as EEqualTo);
         

@@ -6,17 +6,17 @@ namespace SW.Eval
 {
     public class EOr : BinaryFilterBase
     {
-        string Enclose(IEvalFilter exp)
+        string Enclose(IEvalExpression exp)
             => exp is EAnd
                 ? $"({exp})"
                 : exp.ToString();
         
-        public EOr(IEvalFilter left, IEvalFilter right) : base(left, right)
+        public EOr(IEvalExpression left, IEvalExpression right) : base(left, right)
         {
 
         }
         
-        public override string ToString() => $"{Enclose(Left)} OR {Enclose(Right)}";
+        public override string ToString() => $"{Enclose(Left)} || {Enclose(Right)}";
 
         protected override bool IsMatch(bool left, bool right) => left || right;
     }

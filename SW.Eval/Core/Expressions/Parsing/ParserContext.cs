@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SW.Eval.Binding.Parsing
+namespace SW.Eval.Expressions.Parsing
 {
     public class ParserContext
     {
-
+        
     }
 }
