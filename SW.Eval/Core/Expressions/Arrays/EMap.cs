@@ -8,7 +8,7 @@ namespace SW.Eval
 {
     public class EMap : IEvalExpression
     {
-        public ExpressionClosure Closure { get; }
+        public DataFunc Closure { get; }
 
         public IEvalExpression SourceArray { get; }
 
@@ -18,7 +18,7 @@ namespace SW.Eval
 
         public string IndexVarName => Closure.Parameters.Length < 2 ? null : Closure.Parameters[1];
 
-        public EMap(IEvalExpression sourceArray, ExpressionClosure closure)
+        public EMap(IEvalExpression sourceArray, DataFunc closure)
         {
             Closure = closure ?? throw new ArgumentNullException(nameof(closure));
             
@@ -49,7 +49,7 @@ namespace SW.Eval
 
                 if (source is ISet set)
                 {
-                    return MapperExpr.MapRun(ctx, set.Items, ItemVarName, IndexVarName)
+                    return MapperExpr.GetStateAggregate(ctx, set.Items, ItemVarName, IndexVarName)
                         .Apply(ctx, (_, outputs) => 
                             new EvalComplete(PayloadArray.Combine(outputs)));
                 }

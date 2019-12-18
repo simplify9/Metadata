@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SW.Eval.Core.Expressions.Parsing.Experimental
+namespace SW.Eval.Parser.Internal
 {
     public static class Parsers
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SW.Eval.Core.Expressions.Parsing.Experimental
+namespace SW.Eval.Parser.Internal
 {
     public class ParserResult<T> : IParserResult<T>
     {

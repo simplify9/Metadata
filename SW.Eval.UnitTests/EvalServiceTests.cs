@@ -11,11 +11,11 @@ namespace SW.Eval.UnitTests
     [TestClass]
     public class EvalServiceTests
     {
-        readonly EvalService eval;
+        readonly EvalPayloadService eval;
 
         public EvalServiceTests()
         {
-            eval = new EvalService(new[] { new FromJToken() }, new[] { new ToJToken() });
+            eval = new EvalPayloadService(new[] { new FromJToken() }, new[] { new ToJToken() });
         }
 
         [TestMethod]

@@ -9,9 +9,9 @@ namespace SW.Eval.Binding
     
     public class PayloadNull : IPayload, INull
     {
-        static readonly string KEY = "_#%$";
+        
 
-        public static PayloadNull Singleton = new PayloadNull();
+        public static readonly PayloadNull Singleton = new PayloadNull();
         
         PayloadNull()
         {

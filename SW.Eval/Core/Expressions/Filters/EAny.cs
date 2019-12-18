@@ -7,11 +7,11 @@ using System.Text;
 
 namespace SW.Eval
 {
-    public class EContainsWhere : IEvalExpression
+    public class EAny : IEvalExpression
     {
         public IEvalExpression SourceArray { get; }
 
-        public ExpressionClosure Closure { get; }
+        public DataFunc Closure { get; }
 
         public IEvalExpression MapperExpr => Closure.Body;
 
@@ -20,7 +20,7 @@ namespace SW.Eval
         public string IndexVarName => Closure.Parameters.Length < 2 ? null : Closure.Parameters[1];
 
 
-        public EContainsWhere(IEvalExpression sourceArray, ExpressionClosure closure)
+        public EAny(IEvalExpression sourceArray, DataFunc closure)
         {
             Closure = closure ?? throw new ArgumentNullException(nameof(closure));
 
@@ -52,7 +52,7 @@ namespace SW.Eval
 
                 if (source is ISet set)
                 {
-                    return MapperExpr.MapRun(ctx, set.Items, ItemVarName, IndexVarName)
+                    return MapperExpr.GetStateAggregate(ctx, set.Items, ItemVarName, IndexVarName)
                         .Apply(ctx, (_, outputs) =>
                             new EvalComplete(
                                 new PayloadPrimitive<bool>(outputs.Any(output => 

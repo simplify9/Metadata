@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SW.Eval.Core.Expressions.Parsing.Experimental;
+using SW.Eval.Parser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +9,16 @@ using System.Threading.Tasks;
 namespace SW.Eval.UnitTests
 {
     [TestClass]
-    public class EvalExpressionTests
+    public class EvalRuntimeTests
     {
-        static readonly EvalService evalService = new EvalService();
+        static readonly EvalRuntime evalRuntime = new EvalRuntime();
+
+        static readonly EvalPayloadService payloadService = new EvalPayloadService();
 
         static Task<DataResponse[]> ServeParcelByNo(DataRequest rq)
         {
             
-            var parcels = rq.Queries.Select(q => evalService.CreatePayload(new
+            var parcels = rq.Queries.Select(q => payloadService.CreatePayload(new
             {
                 no = "123",
                 shipper = "Yaser Awajan",
@@ -31,7 +33,7 @@ namespace SW.Eval.UnitTests
 
         static Task<DataResponse[]> ServeTrackableByNo(DataRequest rq)
         {
-            var trackables = rq.Queries.Select(q => evalService.CreatePayload(new
+            var trackables = rq.Queries.Select(q => payloadService.CreatePayload(new
             {
                 trackableNo = "123",
                 containedIn = new[]
@@ -50,7 +52,7 @@ namespace SW.Eval.UnitTests
 
         static Task<DataResponse[]> ServeContainerByNo(DataRequest rq)
         {
-            var responses = rq.Queries.Select(q => evalService.CreatePayload(new
+            var responses = rq.Queries.Select(q => payloadService.CreatePayload(new
             {
                 no = "123",
                 type = "bag",
@@ -65,7 +67,7 @@ namespace SW.Eval.UnitTests
 
         static Task<DataResponse[]> ServeTrackableRefs(DataRequest rq)
         {
-            var responses = rq.Queries.Select(q => evalService.CreatePayload(new[]
+            var responses = rq.Queries.Select(q => payloadService.CreatePayload(new[]
             {
                 "gaergaerG234234", "ag34gareg", "aggg3333", "1232"
             }));
@@ -97,7 +99,7 @@ namespace SW.Eval.UnitTests
         [TestMethod]
         public async Task Test_Expressions()
         {
-            var expected = evalService.CreatePayload(new
+            var expected = payloadService.CreatePayload(new
             {
                 no = "123",
                 shipper = "Yaser Awajan",
@@ -138,7 +140,7 @@ namespace SW.Eval.UnitTests
                             new ECall("trackableByNo") 
                                 .WithParam("no", new EPath(new EVar("$"), PayloadPath.Root.Append("parcelNo"))), 
                             PayloadPath.Root.Append("containedIn")), 
-                        new ExpressionClosure(
+                        new DataFunc(
                             new ECall("containerByNo")
                                 .WithParam("no", new EPath(new EVar("c"), PayloadPath.Root.Append("number"))),
                         "c")))
@@ -148,93 +150,16 @@ namespace SW.Eval.UnitTests
                     new ECall("trackableRefs")
                         .WithParam("no", new EPath(new EVar("$"), PayloadPath.Root.Append("parcelNo"))));
             
-            var result = await evalService.GetQueryResults(obj, 
-                evalService.CreatePayload(new { parcelNo = "123" }), Serve);
+            var result = await evalRuntime.GetResults(obj, 
+                payloadService.CreatePayload(new { parcelNo = "123" }), Serve);
 
             Assert.AreEqual(expected, result);
 
             
-
-            //Assert.IsTrue(parsedClosure.IsSuccessful);
-
         }
 
-        static void AssertClosureMustSucceed<TBody>(string expr)
-        {
-            var c1 = ExpressionParsers.ParseFunc(expr);
-            Assert.IsTrue(c1.IsSuccessful);
-            Assert.AreEqual(string.Empty, c1.Remaining);
-            Assert.IsInstanceOfType(c1.Value.Body, typeof(TBody));
-        }
+        
 
-        static void AssertExpressionMustSucceed<T>(string expr)
-        {
-            var c1 = ExpressionParsers.ParseExpression(expr);
-            Assert.IsTrue(c1.IsSuccessful);
-            Assert.AreEqual(string.Empty, c1.Remaining);
-            Assert.IsInstanceOfType(c1.Value, typeof(T));
-        }
-
-        static void AssertExpressionMustFail(string expr)
-        {
-            var r = ExpressionParsers.ParseExpression(expr);
-            Assert.AreNotEqual(string.Empty, r.Remaining);
-        }
-
-        [TestMethod]
-        public void Test_Parsers()
-        {
-            
-            AssertClosureMustSucceed<EObject>("$ => { }");
-            AssertClosureMustSucceed<EObject>("($) => {}   ");
-            AssertClosureMustSucceed<EObject>("   (p1, p2) => {}");
-
-            AssertExpressionMustSucceed<EConstant>("\"\"");
-            AssertExpressionMustSucceed<EConstant>("\"yyyy\"");
-            AssertExpressionMustSucceed<EConstant>("-54");
-            AssertExpressionMustSucceed<EConstant>("-54.0");
-            AssertExpressionMustSucceed<EConstant>("false");
-            AssertExpressionMustSucceed<EConstant>("true");
-
-            AssertExpressionMustSucceed<EArray>("[]");
-            AssertExpressionMustSucceed<EConstant>("false");
-
-            AssertExpressionMustSucceed<EVar>("sss");
-
-            AssertExpressionMustSucceed<EObject>("{  }");
-            AssertExpressionMustSucceed<EObject>("{ a:243 }");
-            AssertExpressionMustSucceed<EPath>("$.ffff");
-            AssertExpressionMustSucceed<ECall>("a(b:$.ffff)");
-            AssertExpressionMustSucceed<ECall>("a(b:$.ffff, c:t())");
-            AssertExpressionMustSucceed<ECall>("a(b:$.ffff, c:t(r:rr))");
-            AssertExpressionMustSucceed<ECall>("a(b:$.ffff, c:(t(g:rr)))");
-            AssertExpressionMustSucceed<ECall>("(a(b:$.ffff, c:(t(d:rr))))");
-
-            AssertExpressionMustFail("a(, c:$.ffff)");
-            
-            AssertExpressionMustSucceed<ECall>("a(b:$.ffff, c:\"44\")");
-            AssertExpressionMustFail("a(b:$.ffff, c:\"44\"");
-
-            AssertExpressionMustSucceed<EObject>("{ ...{ a: 5, c:3 }, v:2 }");
-            AssertExpressionMustSucceed<EObject>("{ ...b( a: 5, c:3 ), v:2 }");
-
-            AssertExpressionMustSucceed<EAnd>("l && r");
-            AssertExpressionMustSucceed<EAnd>("l && r && (a || b)");
-            AssertExpressionMustSucceed<EPath>("r.eeet.mag");
-            AssertExpressionMustSucceed<EFilter>("r.eeet.map(c => c).filter(c => c)");
-
-            var closureCode = @"
-$ => {
-    ...parcelByNo(no:$.parcelNo),
-    containedIn: trackable(no:$.parcelNo).containedIn.map(c => containerByNo(no: c.number)),
-    references: trackableRefs(no: $.parcelNo)
-}";
-
-            AssertClosureMustSucceed<EObject>(closureCode);
-
-            var parsedClosure = ExpressionParsers.ParseFunc(closureCode);
-
-
-        }
+        
     }
 }

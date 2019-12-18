@@ -10,31 +10,13 @@ using System.Threading.Tasks;
 
 namespace SW.Eval
 {
-    public class EvalService
+    public class EvalPayloadService
     {
         static readonly DelegateCache readerCache = new DelegateCache();
         static readonly DelegateCache convertCache = new DelegateCache();
         readonly IPayloadTypeReaderFactory[] readerFactories;
         readonly IPayloadTypeConverterFactory[] converterFactories;
-
-        static EvalDataTaskFactory Decorate(EvalDataTaskFactory taskFactory)
-            => async (r) =>
-            {
-                try
-                {
-                    var responses = await taskFactory(r);
-                    return r.Queries.Select(q =>
-                        responses.FirstOrDefault(rs => rs.RequestId == q.Id) ??
-                            new DataResponse(q.Id, NoPayload.Singleton)).ToArray();
-                }
-                catch (Exception ex)
-                {
-                    var errorPayload = new PayloadError(ex);
-                    return r.Queries.Select(q => new DataResponse(q.Id, errorPayload)).ToArray();
-                }
-            };
         
-
         static IEnumerable<IPayloadTypeConverterFactory> SortMergeConverters(IEnumerable<IPayloadTypeConverterFactory> additional)
         {
             foreach (var e in additional) yield return e;
@@ -59,7 +41,7 @@ namespace SW.Eval
             yield return new FromClass();
         }
 
-        public EvalService(
+        public EvalPayloadService(
             IEnumerable<IPayloadTypeReaderFactory> readerFactories = null,
             IEnumerable<IPayloadTypeConverterFactory> converterFactories = null)
         {
@@ -90,37 +72,6 @@ namespace SW.Eval
                 : null;
         }
 
-        public async Task<IPayload> GetQueryResults(IEvalExpression query, IPayload input, EvalDataTaskFactory taskFactory)
-        {
-            // create eval context
-            var ctx = new EvalContext(new LexicalScope("$", input));
-
-            IEvalState result = null;
-
-            // loop while expression has non-materialized data requests
-            while ((result = query.Run(ctx)) is EvalInProgress inProgress)
-            {
-                // group requests by func name
-                var batchRequests = inProgress.ReadyToRun
-                    .GroupBy(r => r.DataFuncName)
-                    .Select(batch =>
-                        new DataRequest(batch.Key,
-                            batch.SelectMany(item => item.Queries)));
-
-                // run all
-                var responses = await Task.WhenAll(
-                    batchRequests.Select(r => 
-                        Decorate(taskFactory)(r)));
-
-                // reflect response to context
-                foreach (var response in responses.SelectMany(rSet => rSet))
-                {
-                    ctx = ctx.Materialize(response);
-                }
-            }
-
-            // unwrap final expression result
-            return (result as EvalComplete).Results.First();
-        }
+        
     }
 }

@@ -33,7 +33,7 @@ namespace SW.Eval
             };
         }
 
-        public static IEvalState Run(this IEvalExpression expr, EvalContext ctx)
+        public static IEvalState GetState(this IEvalExpression expr, EvalContext ctx)
         {
             if (expr == null) throw new ArgumentNullException(nameof(expr));
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
@@ -45,12 +45,12 @@ namespace SW.Eval
                 // no arguments
                 ? mapper(ctx, Array.Empty<IPayload>())
                 // run arguments then expression
-                : args.Select(arg => Run(arg.Expression, ctx.CreateSub(arg.Name)))
+                : args.Select(arg => GetState(arg.Expression, ctx.CreateSub(arg.Name)))
                     .Aggregate((e1, e2) => e1.MergeWith(e2))
                     .Apply(ctx, ApplyValidation(args, mapper));
         }
 
-        public static IEvalState MapRun(this IEvalExpression expr, 
+        public static IEvalState GetStateAggregate(this IEvalExpression expr, 
             EvalContext ctx, 
             IEnumerable<IPayload> payloads,
             string itemVarName,
@@ -69,7 +69,7 @@ namespace SW.Eval
                     : ctxInner;
 
                 // evaluate
-                return expr.Run(ctxInner);
+                return expr.GetState(ctxInner);
             });
 
             // convert array of payloads to 'PayloadArray' as expected

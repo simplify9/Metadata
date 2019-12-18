@@ -4,13 +4,13 @@ using System.Text;
 
 namespace SW.Eval
 {
-    public class ExpressionClosure
+    public class DataFunc
     {
         public string[] Parameters { get; }
 
         public IEvalExpression Body { get; }
 
-        public ExpressionClosure(IEvalExpression expr, params string[] parameters)
+        public DataFunc(IEvalExpression expr, params string[] parameters)
         {
             Body = expr ?? throw new ArgumentNullException(nameof(expr));
             Parameters = parameters ?? throw new ArgumentNullException(nameof(parameters));
