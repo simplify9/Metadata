@@ -69,8 +69,6 @@ namespace SW.Content.Search.EF
                 INNER JOIN (SELECT * FROM {ctx.DocTable}
                 WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id
                 ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
-                OFFSET {offset} ROWS
-                FETCH NEXT {limit} ROWS ONLY
              ";
         }
 

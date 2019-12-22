@@ -82,7 +82,7 @@ namespace SW.Content.Search.EF
             
             // apply pagination
 
-            var matches = await q.ToArrayAsync();
+            var matches = await q.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
             return new SearchQueryResult<T>(matches
                 .Select(m => JsonUtil.Deserialize<T>(m.BodyData)).ToArray(), 
                 count);
