@@ -128,7 +128,7 @@ namespace SW.Content.UnitTests
                     ContentPath.Parse($"$.{nameof(Employee.Name)}")
                     ,SearchQuery.Op.LessThanOrEquals,ContentFactory.Default.CreateFrom(new DateTime(2019,11,27)))
             };
-            var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), true, 0, 20);
+            var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), true, 0, 30);
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
             var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
                 (SELECT DocumentId FROM [search].[DocTokens] 
