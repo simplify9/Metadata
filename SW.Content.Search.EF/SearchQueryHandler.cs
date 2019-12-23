@@ -51,7 +51,11 @@ namespace SW.Content.Search.EF
 
             var pathes = await _dbc.Set<DbDocSourcePath>().Where(p=>p.DocumentType==query.DocumentType.Name).ToListAsync();
             string stringQuery =  SqlResolver.ResolveSqlText(query,(p)=>pathes.FirstOrDefault(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
+            string stringQueryWithoutPaging= SqlResolver.ResolveSqlText(query, (p) => pathes.FirstOrDefault(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",false);
+
             IQueryable<DbDoc> q = _dbc.Set<DbDoc>().FromSql(stringQuery);
+            IQueryable<DbDoc> withOutPagingQ= _dbc.Set<DbDoc>().FromSql(stringQueryWithoutPaging);
+
             // compose where
 
             //var p = Expression.Parameter(typeof(DbDoc));
@@ -65,10 +69,10 @@ namespace SW.Content.Search.EF
 
             //var where = Expression.Lambda<Func<DbDoc, bool>>(body, p);
             //q = q.Where(where);
-            
+
             //// evaluate count
 
-            var count = await q.CountAsync();
+            var count = await withOutPagingQ.CountAsync();
             
             //// apply order by
 
