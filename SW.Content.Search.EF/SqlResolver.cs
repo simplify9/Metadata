@@ -57,12 +57,10 @@ namespace SW.Content.Search.EF
             var docTypeName = query.DocumentType.Name;
             var filterQuery = ResolveFilterQuery(ctx, query);
             var sortPathId = pathResolver(query.SortByField.ToString());
-            var offset = query.Offset;
-            var limit = query.Limit;
-            var sorting = query.SortByDescending ? "DESC" : string.Empty;
-            var paging =withPaging? $@"ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
-                OFFSET 0 ROWS
-                FETCH NEXT 20 ROWS ONLY":string.Empty;
+            //var offset = query.Offset;
+           // var limit = query.Limit;
+            //var sorting = query.SortByDescending ? "DESC" : string.Empty;
+            
             return $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
                 ({filterQuery}) as filtered 
                 LEFT JOIN (SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable}
@@ -70,8 +68,7 @@ namespace SW.Content.Search.EF
                 ON Sorted.DocumentId = filtered.DocumentId
                 ) AS [A] 
                 INNER JOIN (SELECT * FROM {ctx.DocTable}
-                WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id 
-                {paging}";
+                WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id";
         }
 
         static string ResolveFilterLine(Context ctx, SearchQuery.Line line)
