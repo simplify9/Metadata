@@ -53,7 +53,9 @@ namespace SW.Content.UnitTests
                 ON Sorted.DocumentId = filtered.DocumentId) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType.Name}') AS [B] ON [A].DocumentId = [B].Id
-                 ORDER BY [A].ValueAsAny";
+                ORDER BY [A].ValueAsAny 
+                OFFSET {query.Offset} ROWS
+                FETCH NEXT {query.Limit} ROWS ONLY";
 
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
         }
@@ -98,7 +100,9 @@ namespace SW.Content.UnitTests
                ) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType.Name}') AS [B] ON [A].DocumentId = [B].Id
-                ORDER BY [A].ValueAsAny DESC";
+                ORDER BY [A].ValueAsAny DESC
+                OFFSET {query.Offset} ROWS
+                FETCH NEXT {query.Limit} ROWS ONLY";
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
 
         }
@@ -140,6 +144,8 @@ namespace SW.Content.UnitTests
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType}') AS [B] ON [A].DocumentId = [B].Id
                  ORDER BY [A].ValueAsAny DESC
+                OFFSET {query.Offset} ROWS
+                FETCH NEXT {query.Limit} ROWS ONLY
              ";
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
 
@@ -180,7 +186,9 @@ namespace SW.Content.UnitTests
                ) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType}') AS [B] ON [A].DocumentId = [B].Id
-                ORDER BY [A].ValueAsAny DESC";
+                ORDER BY [A].ValueAsAny DESC
+                OFFSET {query.Offset} ROWS
+                FETCH NEXT {query.Limit} ROWS ONLY";
 
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
         }
@@ -231,7 +239,9 @@ namespace SW.Content.UnitTests
                 ) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType}') AS [B] ON [A].DocumentId = [B].Id
-                ORDER BY [A].ValueAsAny DESC";
+                ORDER BY [A].ValueAsAny DESC 
+                OFFSET {query.Offset} ROWS
+                FETCH NEXT {query.Limit} ROWS ONLY";
 
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
 
@@ -263,7 +273,9 @@ namespace SW.Content.UnitTests
                 ) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs]
                 WHERE [SourceType] = '{query.DocumentType}') AS [B] ON [A].DocumentId = [B].Id 
-                ORDER BY [A].ValueAsAny DESC";
+                ORDER BY [A].ValueAsAny DESC
+                OFFSET 0 ROWS
+                FETCH NEXT 20 ROWS ONLY";
 
             Assert.AreEqual(Regex.Replace(expectedWithSpaces, @"\s+", string.Empty), Regex.Replace(actual, @"\s+", string.Empty));
 

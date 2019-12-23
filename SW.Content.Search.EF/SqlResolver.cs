@@ -50,7 +50,7 @@ namespace SW.Content.Search.EF
         public static string ResolveSqlText(SearchQuery query, 
             Func<string,int> pathResolver,
             string docTable,
-            string tokenTable)
+            string tokenTable,bool withPaging=true)
         {
             var ctx = new Context(pathResolver, tokenTable, docTable);
 
@@ -60,6 +60,9 @@ namespace SW.Content.Search.EF
             var offset = query.Offset;
             var limit = query.Limit;
             var sorting = query.SortByDescending ? "DESC" : string.Empty;
+            var paging =withPaging? $@"ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
+                OFFSET 0 ROWS
+                FETCH NEXT 20 ROWS ONLY":string.Empty;
             return $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
                 ({filterQuery}) as filtered 
                 LEFT JOIN (SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable}
@@ -67,9 +70,8 @@ namespace SW.Content.Search.EF
                 ON Sorted.DocumentId = filtered.DocumentId
                 ) AS [A] 
                 INNER JOIN (SELECT * FROM {ctx.DocTable}
-                WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id
-                ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
-             ";
+                WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id 
+                {paging}";
         }
 
         static string ResolveFilterLine(Context ctx, SearchQuery.Line line)
