@@ -54,7 +54,7 @@ namespace SW.Content.Search.EF
             string withoutPagingString = SqlResolver.ResolveSqlText(query, (p) => pathes.FirstOrDefault(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",false);
 
             IQueryable<DbDoc> withoutPagingQuery = _dbc.Set<DbDoc>().FromSql(withoutPagingString);
-            IQueryable<DbDoc> withPagingQuery= _dbc.Set<DbDoc>().FromSql(withoutPagingString);
+            IQueryable<DbDoc> withPagingQuery= _dbc.Set<DbDoc>().FromSql(withPagingstringQuery);
 
             // compose where
 
