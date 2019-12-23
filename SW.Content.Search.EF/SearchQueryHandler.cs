@@ -50,11 +50,10 @@ namespace SW.Content.Search.EF
             if (query == null) throw new ArgumentNullException(nameof(query));
 
             var pathes = await _dbc.Set<DbDocSourcePath>().Where(p=>p.DocumentType==query.DocumentType.Name).ToListAsync();
+            var sortPathId = pathes.FirstOrDefault(k => k.PathString == query.SortByField.ToString()).Id;
             string stringQuery =  SqlResolver.ResolveSqlText(query,(p)=>pathes.FirstOrDefault(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
-            string stringQueryWithoutPaging= SqlResolver.ResolveSqlText(query, (p) => pathes.FirstOrDefault(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",false);
 
             IQueryable<DbDoc> q = _dbc.Set<DbDoc>().FromSql(stringQuery);
-            IQueryable<DbDoc> withOutPagingQ= _dbc.Set<DbDoc>().FromSql(stringQueryWithoutPaging);
 
             // compose where
 
@@ -72,8 +71,8 @@ namespace SW.Content.Search.EF
 
             //// evaluate count
 
-            var count = await withOutPagingQ.CountAsync();
-            
+            var count = await q.CountAsync();
+
             //// apply order by
 
             //var sortPath = query.SortByField.ToString();
@@ -83,10 +82,11 @@ namespace SW.Content.Search.EF
             //        t => t.Document.Id, 
             //        (d,t) => new DocSortValue { Doc = d, OrderBy = t.FirstOrDefault() });
             //qSortable = QueryConversionHelper.BuildSortBy(query, qSortable);
-            
-            // apply pagination
 
-            var matches = await q.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
+            // apply pagination
+            var sorting = query.SortByDescending ? q.OrderByDescending(d => d.Tokens.First(a => a.Path.Id == sortPathId).ValueAsAny) :q.OrderBy(d => d.Tokens.First(a => a.Path.Id == sortPathId).ValueAsAny);
+
+            var matches = await sorting.Skip(query.Offset).Take(query.Limit).ToArrayAsync();
             return new SearchQueryResult<T>(matches
                 .Select(m => JsonUtil.Deserialize<T>(m.BodyData)).ToArray(), 
                 count);
