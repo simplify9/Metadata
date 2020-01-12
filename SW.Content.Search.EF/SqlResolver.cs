@@ -65,11 +65,11 @@ namespace SW.Content.Search.EF
                 FETCH NEXT {query.Limit} ROWS ONLY":string.Empty;
             return $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
                 ({filterQuery}) as filtered 
-                LEFT JOIN (SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable}
+                LEFT JOIN (SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable} WITH (NOLOCK) 
                 WHERE [PathId] = {sortPathId}) as Sorted
                 ON Sorted.DocumentId = filtered.DocumentId
                 ) AS [A] 
-                INNER JOIN (SELECT * FROM {ctx.DocTable}
+                INNER JOIN (SELECT * FROM {ctx.DocTable} WITH (NOLOCK) 
                 WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id
                 {paging}";
         }
@@ -109,12 +109,12 @@ namespace SW.Content.Search.EF
                     op = "<=";
                     break;
             }
-            return $"SELECT DocumentId FROM {ctx.TokenTable} WHERE ([{nameof(DbDocToken.ValueAsAny)}]{op}{FormatValue(line.Value)} AND [PathId]={pathId})";
+            return $"SELECT DocumentId FROM {ctx.TokenTable} WITH (NOLOCK) WHERE ([{nameof(DbDocToken.ValueAsAny)}]{op}{FormatValue(line.Value)} AND [PathId]={pathId})";
         }
 
         static string ResolveFilterQuery(Context ctx, SearchQuery query)
         {
-            var docTokensSelect =$"SELECT DocumentId FROM {ctx.TokenTable} 	Group by [DocumentId]";
+            var docTokensSelect =$"SELECT DocumentId FROM {ctx.TokenTable} WITH (NOLOCK) Group by [DocumentId]";
             return query.QueryLines.Any()
                 ? $"{string.Join(" INTERSECT ", query.QueryLines.Select(li => $"{ResolveFilterLine(ctx, li)}"))}"
                 : docTokensSelect;
