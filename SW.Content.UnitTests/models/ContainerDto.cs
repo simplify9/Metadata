@@ -71,6 +71,8 @@ namespace SW.Content.UnitTests.models
             public string Code { get; set; }
 
             public string Name { get; set; }
+
+            public string[] phones { get; set; }
         }
         public class ReferenceDto : IEquatable<ReferenceDto>
         {

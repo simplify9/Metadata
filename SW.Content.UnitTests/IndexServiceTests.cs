@@ -72,9 +72,9 @@ namespace SW.Content.UnitTests
             {
                 ContainerNumber = new ContainerNumberDto()
                 {
-                    Number = "0001"
+                    Number = "bcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxz :123456789012345678901234567890 12345678901234567890 12345678901234567890123456789012bcdefghijklmnopqrst uvwxyabcdefghijklmnopqrstuvwxz:12345678901234 567890123456789012345678 901234567890123456 78901234567890123456789012"
                 },
-                AssignedTo = new ContainerDto.CarrierDto { Code = "aby", Name = "name" },
+                AssignedTo = new ContainerDto.CarrierDto { Code = "aby", Name = "name", phones = new string[] { "bcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxz:1234567890123456789012345678901234567890123456789012345678901234567890123456789012bcdefghijklmnopqrstuvwxyabcdefghijklmnopqrstuvwxz:1234567890123456789012345678901234567890123456789012345678901234567890123456789012" } }
             };
             var cmd = indexService.CreateUpdateCommand("0001", container);
             await indexService.Handle(cmd);
