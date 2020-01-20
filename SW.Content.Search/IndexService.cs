@@ -38,6 +38,26 @@ namespace SW.Content.Search
             return new DropIndexCommand(docSource);
         }
 
+        IEnumerable<ContentPathValue> TokenizePairs(IEnumerable<ContentPathValue> source)
+        {
+            foreach (var pair in source)
+            {
+                if (pair.Value.ContentType() == ContentType.Text)
+                {
+                    var tokens = (pair.Value as ContentText).Value.Split(' ');
+
+                    foreach (var t in tokens)
+                    {
+                        if (t.Length < 200 && t != string.Empty)
+                        {
+                            yield return new ContentPathValue(pair.Path, new ContentText(t));
+                        }
+                    }
+                }
+                else yield return pair;
+            }
+        }
+
         IEnumerable<ContentPathValue> TokenFilter(IEnumerable<ContentPathValue> source)
         {
             foreach (var pair in source)
@@ -65,7 +85,7 @@ namespace SW.Content.Search
             ContentPath lastPath = null;
             var offset = 0;
             // filter pairs
-            var filteredPairs = TokenFilter(pairs)
+            var filteredPairs = TokenFilter(TokenizePairs(pairs))
                 // order by path
                 .OrderBy(p => p.Path.ToString());
 
