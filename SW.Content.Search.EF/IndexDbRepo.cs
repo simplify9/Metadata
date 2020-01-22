@@ -187,9 +187,9 @@ namespace SW.Content.Search.EF
         public async Task DeleteDocuments(DocumentSource[] sources)
         {
             var docsToDelete = BuildDocumentSetQueryable(sources).Include(d => d.Tokens);
-            foreach (var doc in docsToDelete)
+            foreach (var doc in docsToDelete.ToList())
             {
-                foreach (var docToken in doc.Tokens) doc.Tokens.Remove(docToken);
+                foreach (var docToken in doc.Tokens.ToList()) doc.Tokens.Remove(docToken);
                 _dbc.Remove(doc);
             }
 
