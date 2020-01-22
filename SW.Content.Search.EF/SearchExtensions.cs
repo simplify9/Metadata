@@ -15,6 +15,8 @@ namespace SW.Content.Search.EF
             doc.Property(d => d.SourceIdString).IsUnicode(false).HasMaxLength(128);
             doc.Property(d => d.SourceType).IsUnicode(false).HasMaxLength(256);
             doc.HasMany(d => d.Tokens).WithOne(t => t.Document);
+            doc.HasIndex(d => d.SourceIdString);
+            doc.HasIndex(d => d.SourceType);
 
             var token = b.Entity<DbDocToken>();
             token.ToTable("DocTokens", schemaName);
@@ -22,6 +24,8 @@ namespace SW.Content.Search.EF
             token.HasOne(t => t.Path).WithMany();
            // token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
             token.Property(t => t.ValueAsAny).IsUnicode(true).HasMaxLength(512);
+            token.HasIndex(t => new { t.Path.Id, t.ValueAsAny });
+
             //token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
             
             var path = b.Entity<DbDocSourcePath>();
