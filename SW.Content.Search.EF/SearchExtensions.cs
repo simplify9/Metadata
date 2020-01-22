@@ -24,7 +24,7 @@ namespace SW.Content.Search.EF
             token.HasOne(t => t.Path).WithMany();
            // token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
             token.Property(t => t.ValueAsAny).IsUnicode(true).HasMaxLength(512);
-            token.HasIndex(t => new { t.Path.Id, t.ValueAsAny });
+            token.HasIndex(new string[] { "PathId", "ValueAsAny" });
 
             //token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
             
