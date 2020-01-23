@@ -13,13 +13,37 @@ namespace SW.Content.UnitTests
     public class SqlResolverTests
     {
 
-       
+
+
+
+
+        //class Path
+        //{
+        //    public string path { get; set; }
+        //    public int id { get; set; }
+
+        //}
 
 
 
         [TestMethod]
         public void InitialTest()
         {
+            //var paths = new List<Path>()
+            //{
+            //    new Path()
+            //    {
+            //        id = 199,
+            //        path = "$.Audit.CreatedOn",
+            //    },
+            //    new Path()
+            //    {
+            //        id = 150,
+            //        path ="$.Name",
+            //    }
+
+            //    // ...etc.
+            //};
             var paths = new Dictionary<string, int>
             {
                 { "$.Audit.CreatedOn", 199 },
