@@ -22,7 +22,7 @@ namespace SW.Content.UnitTests
         {
             var paths = new Dictionary<string, int>
             {
-                { "$.Audit.CreatedOn", 199 },
+                { "$.EndDate", 199 },
                 { "$.Name", 150 },
                 { "$.Id", 155 },
                 // ...etc.
@@ -37,6 +37,9 @@ namespace SW.Content.UnitTests
                 new SearchQuery.Line(
                     ContentPath.Parse($"$.{nameof(Employee.Id)}")
                     ,SearchQuery.Op.Equals,ContentFactory.Default.CreateFrom(1)),
+                   new SearchQuery.Line(
+                    ContentPath.Parse($"$.{nameof(Employee.EndDate)}")
+                    ,SearchQuery.Op.Equals,ContentFactory.Default.CreateFrom(DateTime.Now)),
 
             };
             var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), false, 0, 20);
