@@ -25,9 +25,10 @@ namespace SW.Content.Search.EF
            // token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
             token.Property(t => t.ValueAsAny).IsUnicode(true).HasMaxLength(512);
             token.HasIndex(new string[] { "PathId", "ValueAsAny" });
+            token.HasIndex(t=>t.ValueAsAny);
 
             //token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
-            
+
             var path = b.Entity<DbDocSourcePath>();
             path.ToTable("DocPaths", schemaName);
             path.HasKey(p => p.Id);
