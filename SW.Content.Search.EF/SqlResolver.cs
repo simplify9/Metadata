@@ -76,14 +76,7 @@ namespace SW.Content.Search.EF
 
         static string ResolveFilterLine(Context ctx, SearchQuery.Line line)
         {
-            if(ctx == null)
-            {
-                throw new ArgumentNullException("Context ctx is null");
-            }
-            if (line == null)
-            {
-                throw new ArgumentNullException("Line is null");
-            }
+           
             var pathId = ctx.ResolvePath(line.Field.ToString());
 
             string op = null;
