@@ -66,11 +66,15 @@ namespace SW.Content.UnitTests
             var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), false, 0, 20);
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
             var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens]  WITH (NOLOCK)
-                 WHERE ([ValueAsAny]='John Smith' AND [PathId]=150) 
-                INTERSECT 
-                SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK)
-                WHERE ([ValueAsAny]='011.000000' AND [PathId]=155) 
+                ( SELECT f1.DocumentId FROM 
+                    (    
+                    SELECT DocumentId FROM [search].[DocTokens]  WITH (NOLOCK)
+                    WHERE ([ValueAsAny]='John Smith' AND [PathId]=150) 
+                     UNION ALL  
+                    SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK)
+                    WHERE ([ValueAsAny]='011.000000' AND [PathId]=155) 
+                    ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length}               
                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = {paths["$.Id"]}) as Sorted
@@ -112,11 +116,16 @@ namespace SW.Content.UnitTests
 
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
             var expectedWithSpaces= $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                 WHERE ([ValueAsAny] IN ('0001ddd','0002ddd','0003ddd') AND [PathId]=156) 
-                INTERSECT
-                SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK)
-                WHERE ([ValueAsAny] IN ('011.000000','012.000000','013.000000') AND [PathId]=150) 
+                (
+                    SELECT f1.DocumentId FROM 
+                    (    
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny] IN ('0001ddd','0002ddd','0003ddd') AND [PathId]=156) 
+                        UNION ALL
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK)
+                        WHERE ([ValueAsAny] IN ('011.000000','012.000000','013.000000') AND [PathId]=150) 
+                    ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length}  
                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = 155) as Sorted
@@ -154,17 +163,23 @@ namespace SW.Content.UnitTests
             };
             var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), true, 0, 30);
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
-            var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                 WHERE ([ValueAsAny]>='2019-08-01T00:00:00.0000000' AND [PathId]=150)
-                INTERSECT
-                SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                WHERE ([ValueAsAny]<='2019-11-27T00:00:00.0000000' AND [PathId]=150) 
+            var expectedWithSpaces = $@"SELECT [B].* FROM (
+                SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
+                (
+                    SELECT f1.DocumentId FROM 
+                    (    
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny]>='2019-08-01T00:00:00.0000000' AND [PathId]=150)
+                        UNION ALL
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny]<='2019-11-27T00:00:00.0000000' AND [PathId]=150) 
+                    ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length} 
                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = 155) as Sorted
                 ON Sorted.DocumentId = filtered.DocumentId
-               ) AS [A] 
+                ) AS [A] 
                 INNER JOIN (SELECT * FROM [search].[Docs] WITH (NOLOCK)
                 WHERE [SourceType] = '{query.DocumentType}') AS [B] ON [A].DocumentId = [B].Id
                  ORDER BY [A].ValueAsAny DESC 
@@ -201,9 +216,14 @@ namespace SW.Content.UnitTests
             var query = new SearchQuery(docType, queryLines, ContentPath.Parse($"$.{nameof(Employee.Id)}"), true, 0, 20);
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
             var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                 WHERE ([ValueAsAny] IS NULL AND [PathId]=156) 
-                ) as filtered 
+                (
+                    SELECT f1.DocumentId FROM 
+                    (    
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny] IS NULL AND [PathId]=156) 
+                    ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length} 
+                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = 155) as Sorted
                 ON Sorted.DocumentId = filtered.DocumentId
@@ -248,14 +268,20 @@ namespace SW.Content.UnitTests
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
 
             var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                 WHERE ([ValueAsAny] IS NOT NULL AND [PathId]=156)
-                INTERSECT
-                SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                 WHERE ([ValueAsAny]>='2019-08-01T00:00:00.0000000' AND [PathId]=150)
-                INTERSECT
-                SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
-                WHERE ([ValueAsAny]<='2019-11-27T00:00:00.0000000' AND [PathId]=150) 
+                (
+                     SELECT f1.DocumentId FROM 
+                    (    
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny] IS NOT NULL AND [PathId]=156)
+                        UNION ALL
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                            WHERE ([ValueAsAny]>='2019-08-01T00:00:00.0000000' AND [PathId]=150)
+                        UNION ALL
+                        SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) 
+                        WHERE ([ValueAsAny]<='2019-11-27T00:00:00.0000000' AND [PathId]=150)
+                    ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length} 
+                     
                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = {paths["$.Id"]}) as Sorted
@@ -289,7 +315,13 @@ namespace SW.Content.UnitTests
             var actual = SqlResolver.ResolveSqlText(query, (s) => paths[s], "[search].[Docs]", "[search].[DocTokens]");
 
             var expectedWithSpaces = $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                (SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) Group by [DocumentId]
+                (
+                     SELECT f1.DocumentId FROM 
+                        (    
+                            SELECT DocumentId FROM [search].[DocTokens] WITH (NOLOCK) Group by [DocumentId]
+
+                        ) as f1 
+			        group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length} 
                 ) as filtered 
                 LEFT JOIN (SELECT DocumentId,ValueAsAny FROM [search].[DocTokens] WITH (NOLOCK)
                 WHERE [PathId] = {paths["$.Id"]}) as Sorted
