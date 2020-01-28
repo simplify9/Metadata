@@ -63,14 +63,25 @@ namespace SW.Content.Search.EF
             var paging =withPaging? $@"ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
                 OFFSET {query.Offset} ROWS
                 FETCH NEXT {query.Limit} ROWS ONLY":string.Empty;
-            return $@"SELECT [B].* FROM (SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
-                ({filterQuery}) as filtered 
-                LEFT JOIN (SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable} WITH (NOLOCK) 
-                WHERE [PathId] = {sortPathId}) as Sorted
-                ON Sorted.DocumentId = filtered.DocumentId
+        return $@"SELECT [B].* FROM (
+                    SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
+                    (
+                        SELECT f1.DocumentId FROM 
+                        (    
+                            {filterQuery}
+                        ) as f1 
+			            group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length}
+                    ) as filtered 
+                    LEFT JOIN (
+                        SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable} WITH (NOLOCK) 
+                        WHERE [PathId] = {sortPathId}
+                    ) as Sorted
+                    ON Sorted.DocumentId = filtered.DocumentId
                 ) AS [A] 
-                INNER JOIN (SELECT * FROM {ctx.DocTable} WITH (NOLOCK) 
-                WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}') AS [B] ON [A].DocumentId = [B].Id
+                INNER JOIN (
+                    SELECT * FROM {ctx.DocTable} WITH (NOLOCK) 
+                    WHERE [{nameof(DbDoc.SourceType)}] = '{docTypeName}'
+                ) AS [B] ON [A].DocumentId = [B].Id
                 {paging}";
         }
 
@@ -117,7 +128,7 @@ namespace SW.Content.Search.EF
         {
             var docTokensSelect =$"SELECT DocumentId FROM {ctx.TokenTable} WITH (NOLOCK) Group by [DocumentId]";
             return query.QueryLines.Any()
-                ? $"{string.Join(" INTERSECT ", query.QueryLines.Select(li => $"{ResolveFilterLine(ctx, li)}"))}"
+                ? $"{string.Join(" UNION ALL ", query.QueryLines.Select(li => $"{ResolveFilterLine(ctx, li)}"))}"
                 : docTokensSelect;
         }
         
