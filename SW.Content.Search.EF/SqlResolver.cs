@@ -50,7 +50,7 @@ namespace SW.Content.Search.EF
         public static string ResolveSqlText(SearchQuery query, 
             Func<string,int> pathResolver,
             string docTable,
-            string tokenTable,bool withPaging=true)
+            string tokenTable,bool isCount=false)
         {
             var ctx = new Context(pathResolver, tokenTable, docTable);
 
@@ -60,11 +60,22 @@ namespace SW.Content.Search.EF
             var offset = query.Offset;
             var limit = query.Limit;
             var sorting = query.SortByDescending ? "DESC" : string.Empty;
-            var paging =withPaging? $@"ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
+            var paging =isCount?  string.Empty : $@"ORDER BY [A].{nameof(DbDocToken.ValueAsAny)} {sorting}
                 OFFSET {query.Offset} ROWS
-                FETCH NEXT {query.Limit} ROWS ONLY":string.Empty;
-        return $@"SELECT [B].* FROM (
-                    SELECT DISTINCT filtered.DocumentId, Sorted.ValueAsAny FROM 
+                FETCH NEXT {query.Limit} ROWS ONLY";
+
+            var sortingColumn = isCount ? string.Empty : ", Sorted.ValueAsAny";
+
+            var sortingCommand = isCount ? string.Empty : $@"LEFT JOIN (
+                                                            SELECT DocumentId,{ nameof(DbDocToken.ValueAsAny)}
+                                                            FROM { ctx.TokenTable}
+                                                            WITH(NOLOCK)
+                                                                        WHERE[PathId] = { sortPathId}
+                                                                    ) as Sorted
+                                                                    ON Sorted.DocumentId = filtered.DocumentId";
+        return $@"SELECT [B].* FROM 
+                (
+                    SELECT DISTINCT filtered.DocumentId {sortingColumn} FROM 
                     (
                         SELECT f1.DocumentId FROM 
                         (    
@@ -72,11 +83,7 @@ namespace SW.Content.Search.EF
                         ) as f1 
 			            group by f1.DocumentId HAVING count(*) >= {query.QueryLines.Length}
                     ) as filtered 
-                    LEFT JOIN (
-                        SELECT DocumentId,{nameof(DbDocToken.ValueAsAny)} FROM {ctx.TokenTable} WITH (NOLOCK) 
-                        WHERE [PathId] = {sortPathId}
-                    ) as Sorted
-                    ON Sorted.DocumentId = filtered.DocumentId
+                    {sortingCommand}
                 ) AS [A] 
                 INNER JOIN (
                     SELECT * FROM {ctx.DocTable} WITH (NOLOCK) 

@@ -69,7 +69,7 @@ namespace SW.Content.Search
                         pair.Path.Sub(0, pair.Path.Length - 1),
                             pair.Value);
                 }
-                yield return pair;
+                else yield return pair;
             }
         }
 
