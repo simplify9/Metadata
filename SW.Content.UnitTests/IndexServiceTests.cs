@@ -49,7 +49,7 @@ namespace SW.Content.UnitTests
            await indexService.Handle(cmd);
             
 
-           Assert.AreEqual(3, r.Tokens.Count(t => t.SourcePath.Path.ToString() == "$.Phones.[]"));
+           Assert.AreEqual(3, r.Tokens.Count(t => t.SourcePath.Path.ToString() == "$.Phones"));
             
         }
 
