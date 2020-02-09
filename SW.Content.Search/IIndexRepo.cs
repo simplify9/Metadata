@@ -1,4 +1,5 @@
 ﻿using SW.Content;
+using SW.Content.Search.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,7 +10,9 @@ namespace SW.Content.Search
     public interface IIndexRepo
     {
         
-        Task SaveTokens(DocumentToken[] events);
+       // Task SaveTokens(DocumentToken[] events);
+
+        Task UpdateDocuments(Document[] commands);
 
         Task DeleteDocuments(DocumentSource[] sources);
     }

@@ -5,7 +5,7 @@ using System.Text;
 namespace SW.Content.UnitTests
 {
 
-    public enum Gender
+    public enum GenderType
     {
         Male, 
         Female
@@ -64,7 +64,7 @@ namespace SW.Content.UnitTests
 
                 EndDate = DateTime.UtcNow,
 
-                Gender = Gender.Male,
+                Gender = GenderType.Female,
 
                 ContractType = EmploymentType.Permenant,
 
@@ -81,11 +81,11 @@ namespace SW.Content.UnitTests
 
         public string Name { get; set; }
 
-        public Gender Gender { get; set; }
+        public GenderType? Gender { get; set; }
 
         public string[] Phones { get; set; }
 
-        public DateTime StartDate { get; set; }
+        public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
         
