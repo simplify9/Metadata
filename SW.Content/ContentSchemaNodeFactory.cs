@@ -27,6 +27,7 @@ namespace SW.Content
                         new FromClrBoolean(),
                         new FromClrDateTime(),
                         new FromClrNumberType(),
+                        new FromClrEnum(),
                         new FromClrDictionary(ContentFactory.Default, this),
                         new FromClrIEnumerable(ContentFactory.Default, this),
                         new FromClrPoco(ContentFactory.Default, this)

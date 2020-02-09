@@ -25,6 +25,7 @@ namespace SW.Content
                     new FromClrBoolean(),
                     new FromClrDateTime(),
                     new FromClrNumberType(),
+                    new FromClrEnum(),
                     new FromClrDictionary(this, ContentSchemaNodeFactory.Default),
                     new FromClrIEnumerable(this, ContentSchemaNodeFactory.Default),
                     new FromClrPoco(this, ContentSchemaNodeFactory.Default)

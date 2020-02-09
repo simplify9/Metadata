@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -138,7 +139,10 @@ namespace SW.Content.Search.EF
                 ? $"{string.Join(" UNION ALL ", query.QueryLines.Select(li => $"{ResolveFilterLine(ctx, li)}"))}"
                 : docTokensSelect;
         }
-        
-        
+
+
+   
+
+
     }
 }
