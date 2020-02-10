@@ -205,10 +205,13 @@ namespace SW.Content.Search.EF
                         }
                     }
                 }
-             
-                var comm = stringBuilder.CreateCommand(_dbc.Database.GetDbConnection());
+
+                var conn = _dbc.Database.GetDbConnection();
+                var comm = stringBuilder.CreateCommand(conn);
+                comm.Connection.Open();
                 var u = await comm.ExecuteNonQueryAsync();
                 stringBuilder.Clear();
+                comm.Connection.Close();
               
             }
         }
