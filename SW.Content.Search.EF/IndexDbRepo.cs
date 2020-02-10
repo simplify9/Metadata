@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Newtonsoft.Json.Linq;
 
 namespace SW.Content.Search.EF
@@ -12,6 +13,8 @@ namespace SW.Content.Search.EF
     public class IndexDbRepo : IIndexRepo
     {
         readonly DbContext _dbc;
+        readonly IEntityType docTokenModel;
+        readonly string schemaName;
 
         // TODO support Guid keys !!
 
@@ -164,11 +167,8 @@ namespace SW.Content.Search.EF
                 );
             var addAndUpdateAndDeletebulks = addAndMergeUpdatesAndDeletes.ToBatch(50, t => t);
             var conn = _dbc.Database.GetDbConnection();
-            var schemaAnnotation = _dbc.Model
-                .FindEntityType(typeof(DbDoc))
-                .GetAnnotations()
-                .FirstOrDefault(a=>a.Name =="search");
-            var schemaStr = schemaAnnotation == null ? string.Empty : $"[{schemaAnnotation.Name}].";
+         
+            var schemaStr = schemaName == string.Empty ? string.Empty : $"[{schemaName}].";
            
 
             foreach (var chg in addAndUpdateAndDeletebulks)
@@ -187,7 +187,7 @@ namespace SW.Content.Search.EF
                     {
                         var createdOn = DateTime.UtcNow;
                         stringBuilder.Append($@"
-                        INSERT INTO {schemaAnnotation}[DocTokens]
+                        INSERT INTO {schemaStr}[DocTokens]
                                    ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
                              VALUES
                                    ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,createdOn,lastUpdated,valueAsAny);
@@ -196,7 +196,7 @@ namespace SW.Content.Search.EF
                     else if (tuple.Item1 == 1)
                     {
                         stringBuilder.Append($@"
-                        UPDATE {schemaAnnotation}[DocTokens]
+                        UPDATE {schemaStr}[DocTokens]
                         SET
                             [LastUpdatedOn] = ?,ValueAsAny = ?
                         WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
@@ -208,7 +208,7 @@ namespace SW.Content.Search.EF
                         if (pathId > 0)
                         {
                             stringBuilder.Append($@"
-                            DELETE FROM {schemaAnnotation}[DocTokens]
+                            DELETE FROM {schemaStr}[DocTokens]
                                 WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
                         }
                     }
@@ -302,6 +302,9 @@ namespace SW.Content.Search.EF
         public IndexDbRepo(DbContext dbc)
         {
             _dbc = dbc;
+            docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
+            schemaName = docTokenModel.Relational().Schema;
+
         }
     }
 }
