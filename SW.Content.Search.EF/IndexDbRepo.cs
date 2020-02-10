@@ -214,7 +214,7 @@ namespace SW.Content.Search.EF
                 {
                     if (conn.State == ConnectionState.Closed)
                     {
-                        conn.Open();
+                        await _dbc.Database.OpenConnectionAsync();
                         manualOpen = true;
                     }
                     var u = await comm.ExecuteNonQueryAsync();
@@ -228,7 +228,7 @@ namespace SW.Content.Search.EF
                 finally
                 {
                     if (manualOpen && conn.State == ConnectionState.Open)
-                        conn.Close();
+                         _dbc.Database.CloseConnection();
                 }
 
 
