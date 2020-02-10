@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -205,8 +206,10 @@ namespace SW.Content.Search.EF
                         }
                     }
                 }
-             
-                var comm = stringBuilder.CreateCommand(_dbc.Database.GetDbConnection());
+
+                var conn = _dbc.Database.GetDbConnection();
+                var comm = stringBuilder.CreateCommand(conn);
+                if(comm.Connection.State == ConnectionState.Closed) { comm.Connection.Open(); }
                 var u = await comm.ExecuteNonQueryAsync();
                 stringBuilder.Clear();
               
