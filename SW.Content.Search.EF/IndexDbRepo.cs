@@ -163,7 +163,14 @@ namespace SW.Content.Search.EF
                     )
                 );
             var addAndUpdateAndDeletebulks = addAndMergeUpdatesAndDeletes.ToBatch(50, t => t);
-          
+            var conn = _dbc.Database.GetDbConnection();
+            var schemaAnnotation = _dbc.Model
+                .FindEntityType(typeof(DbDoc))
+                .GetAnnotations()
+                .FirstOrDefault(a=>a.Name =="search");
+            var schemaStr = schemaAnnotation == null ? string.Empty : $"[{schemaAnnotation.Name}].";
+           
+
             foreach (var chg in addAndUpdateAndDeletebulks)
             {
                 foreach (var tuple in chg)
@@ -180,7 +187,7 @@ namespace SW.Content.Search.EF
                     {
                         var createdOn = DateTime.UtcNow;
                         stringBuilder.Append($@"
-                        INSERT INTO [DocTokens]
+                        INSERT INTO {schemaAnnotation}[DocTokens]
                                    ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
                              VALUES
                                    ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,createdOn,lastUpdated,valueAsAny);
@@ -189,10 +196,10 @@ namespace SW.Content.Search.EF
                     else if (tuple.Item1 == 1)
                     {
                         stringBuilder.Append($@"
-                        UPDATE DocTokens
+                        UPDATE {schemaAnnotation}[DocTokens]
                         SET
-                            LastUpdatedOn = ?,ValueAsAny = ?
-                        WHERE DocumentId = ? and PathId = ? and [Offset] = ?",
+                            [LastUpdatedOn] = ?,ValueAsAny = ?
+                        WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
                                 lastUpdated,
                                 valueAsAny,docId, pathId, offset);
                     }
@@ -200,14 +207,13 @@ namespace SW.Content.Search.EF
                     {
                         if (pathId > 0)
                         {
-                            stringBuilder.Append(@"
-                            DELETE FROM DocTokens
+                            stringBuilder.Append($@"
+                            DELETE FROM {schemaAnnotation}[DocTokens]
                                 WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
                         }
                     }
                 }
 
-                var conn = _dbc.Database.GetDbConnection();
                 var comm = stringBuilder.CreateCommand(conn);
                 var manualOpen = false;
                 try
