@@ -33,6 +33,7 @@ namespace SW.Content.UnitTests
                 .UseSqlite(_connection)
                 .EnableSensitiveDataLogging(true)
                 .Options;
+            
             var dbc = new DbCtxt(options);
             await dbc.Database.EnsureCreatedAsync();
             return dbc;
