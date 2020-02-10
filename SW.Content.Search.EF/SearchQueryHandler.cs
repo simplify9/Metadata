@@ -51,7 +51,7 @@ namespace SW.Content.Search.EF
 
             var pathes = await _dbc.Set<DbDocSourcePath>().Where(p=>p.DocumentType==query.DocumentType.Name).ToListAsync();
             string withPagingstringQuery = SqlResolver.ResolveSqlText(query,(p)=>pathes.First(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
-            string withoutSortingString = SqlResolver.ResolveSqlText(query, (p) => pathes.First(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",false);
+            string withoutSortingString = SqlResolver.ResolveSqlText(query, (p) => pathes.First(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",true);
 
             IQueryable<DbDoc> withoutPagingQuery = _dbc.Set<DbDoc>().FromSql(withoutSortingString);
             IQueryable<DbDoc> withPagingQuery= _dbc.Set<DbDoc>().FromSql(withPagingstringQuery);

@@ -209,10 +209,30 @@ namespace SW.Content.Search.EF
 
                 var conn = _dbc.Database.GetDbConnection();
                 var comm = stringBuilder.CreateCommand(conn);
-                if(comm.Connection.State == ConnectionState.Closed) { comm.Connection.Open(); }
-                var u = await comm.ExecuteNonQueryAsync();
-                stringBuilder.Clear();
-              
+                var manualOpen = false;
+                try
+                {
+                    if (conn.State == ConnectionState.Closed)
+                    {
+                        conn.Open();
+                        manualOpen = true;
+                    }
+                    var u = await comm.ExecuteNonQueryAsync();
+                    stringBuilder.Clear();
+                }
+                catch(Exception ex) 
+                {
+                    throw new Exception("IO Execption: SaveTokens->IndexDbRepo",ex);
+
+                }
+                finally
+                {
+                    if (manualOpen && conn.State == ConnectionState.Open)
+                        conn.Close();
+                }
+
+
+
             }
         }
 
