@@ -14,7 +14,7 @@ namespace SW.Content.Search.EF
     {
         readonly DbContext _dbc;
         readonly IEntityType docTokenModel;
-       // readonly string schemaName;
+       readonly string schemaName;
 
         // TODO support Guid keys !!
 
@@ -167,9 +167,10 @@ namespace SW.Content.Search.EF
                 );
             var addAndUpdateAndDeletebulks = addAndMergeUpdatesAndDeletes.ToBatch(50, t => t);
             var conn = _dbc.Database.GetDbConnection();
-         
+
+            var schemaNamePrefix = conn.ToString() == "Microsoft.Data.Sqlite.SqliteConnection" ? string.Empty : $"[{schemaName}].";
            // var schemaStr = schemaName == string.Empty ? string.Empty : $"[{schemaName}].";
-           
+
 
             foreach (var chg in addAndUpdateAndDeletebulks)
             {
@@ -187,7 +188,7 @@ namespace SW.Content.Search.EF
                     {
                         var createdOn = DateTime.UtcNow;
                         stringBuilder.Append($@"
-                        INSERT INTO [DocTokens]
+                        INSERT INTO {schemaNamePrefix}[DocTokens]
                                    ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
                              VALUES
                                    ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,createdOn,lastUpdated,valueAsAny);
@@ -196,7 +197,7 @@ namespace SW.Content.Search.EF
                     else if (tuple.Item1 == 1)
                     {
                         stringBuilder.Append($@"
-                        UPDATE [DocTokens]
+                        UPDATE {schemaNamePrefix}[DocTokens]
                         SET
                             [LastUpdatedOn] = ?,ValueAsAny = ?
                         WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
@@ -208,7 +209,7 @@ namespace SW.Content.Search.EF
                         if (pathId > 0)
                         {
                             stringBuilder.Append($@"
-                            DELETE FROM [DocTokens]
+                            DELETE FROM {schemaNamePrefix}[DocTokens]
                                 WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
                         }
                     }
@@ -303,8 +304,9 @@ namespace SW.Content.Search.EF
         {
             _dbc = dbc;
             docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
-            //schemaName = docTokenModel.Relational().Schema;
+            schemaName = docTokenModel.Relational().Schema;
 
         }
+
     }
 }
