@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SW.Content.Search;
 using SW.Content.Search.EF;
@@ -15,10 +16,16 @@ namespace SW.Content.UnitTests
     [TestClass]
     public class IndexServiceTests
     {
+        readonly ILogger<IndexDbRepo> _logger;
 
+        public IndexServiceTests()
+        {
+            _logger = (new LoggerFactory()).CreateLogger<IndexDbRepo>();
 
+        }
         class MockRepo : IIndexRepo
         {
+
             public Document[] Tokens { get; set; }
 
             public Task DeleteDocuments(DocumentSource[] sources)
@@ -65,7 +72,7 @@ namespace SW.Content.UnitTests
             var dbc = new DbCtxt(options);
             await dbc.Database.EnsureCreatedAsync();
 
-            var r = new IndexDbRepo(dbc);
+            var r = new IndexDbRepo(dbc,_logger);
             var indexService = new IndexService(r);
          
             var container = new ContainerDto
