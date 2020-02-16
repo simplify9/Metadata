@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
 namespace SW.Content.Search.EF
@@ -14,9 +15,19 @@ namespace SW.Content.Search.EF
     {
         readonly DbContext _dbc;
         readonly IEntityType docTokenModel;
-       readonly string schemaName;
+        readonly string schemaName;
+        readonly ILogger<IndexDbRepo> _logger;
+
 
         // TODO support Guid keys !!
+        public IndexDbRepo(DbContext dbc, ILogger<IndexDbRepo> logger)
+        {
+            _dbc = dbc;
+            docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
+            schemaName = docTokenModel.Relational().Schema;
+            _logger = logger;
+
+        }
 
         static string GetKeyFieldName(DocumentSource source)
         {
@@ -149,10 +160,10 @@ namespace SW.Content.Search.EF
             Func<DocumentToken,int> pathResolver)
         {
             var addedTokens = newTokens
-                .Where(t => !oldTokens.Any(dbt => t.SourcePath.Path.Equals(dbt.SourcePath.Path) && t.Source.Equals(dbt.Source)));
+                .Where(t => !oldTokens.Any(dbt => t.SourcePath.Equals(dbt.SourcePath) && t.Source.Equals(dbt.Source)));
 
             var updatedTokens = newTokens
-                .Where(t => oldTokens.Any(dbt => t.SourcePath.Path.Equals(dbt.SourcePath.Path) && t.Source.Equals(dbt.Source) && !t.Raw.Equals(dbt.Raw))
+                .Where(t => oldTokens.Any(dbt => t.SourcePath.Equals(dbt.SourcePath) && t.Source.Equals(dbt.Source) && !t.Raw.Equals(dbt.Raw))
                  );
 
             var deletedTokens = oldTokens.Where(t => !newTokens.Any(nt => nt.Source.Equals(t.Source) && t.SourcePath.Path.Equals(nt.SourcePath.Path)));
@@ -225,6 +236,7 @@ namespace SW.Content.Search.EF
                         manualOpen = true;
                     }
                     var u = await comm.ExecuteNonQueryAsync();
+                    _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
                     stringBuilder.Clear();
                 }
                 catch(Exception ex) 
@@ -300,13 +312,7 @@ namespace SW.Content.Search.EF
                             p.PathString == pathString).Id;
                 });
         }
-        public IndexDbRepo(DbContext dbc)
-        {
-            _dbc = dbc;
-            docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
-            schemaName = docTokenModel.Relational().Schema;
-
-        }
+ 
 
     }
 }
