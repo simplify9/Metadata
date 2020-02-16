@@ -73,7 +73,7 @@ namespace SW.Content.UnitTests
             await repo.UpdateDocuments(docs.ToArray());
 
             var emps2 = emps.ToArray();
-            emps2[0].Name = "dana";
+            emps2[0].Name = "layan khater";
             emps[1].Name = "samer";
             emps2[0].Phones = new string[0];
 

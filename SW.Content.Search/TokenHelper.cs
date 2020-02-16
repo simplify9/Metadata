@@ -11,16 +11,15 @@ namespace SW.Content.Search
         {
             foreach (var pair in source)
             {
-                if (pair.Value.ContentType() == ContentType.Text)
+                if (pair.Value.ContentType() == ContentType.Text && pair.Value.ToString().Length > 200)
                 {
                     var tokens = (pair.Value as ContentText).Value.Split(' ');
 
                     foreach (var t in tokens)
                     {
-                        if (t.Length < 200 && t != string.Empty)
-                        {
+                      
                             yield return new ContentPathValue(pair.Path, new ContentText(t));
-                        }
+                        
                     }
                 }
                 else yield return pair;
