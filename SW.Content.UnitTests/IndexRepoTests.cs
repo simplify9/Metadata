@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using SW.Content.Search;
 using SW.Content.Search.EF;
+using SW.Content.UnitTests.models;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -53,11 +54,37 @@ namespace SW.Content.UnitTests
                 Name = "layan",
                 EndDate = DateTime.UtcNow,
                 Id=1,
-                ContractType = EmploymentType.Permenant
+                ContractType = EmploymentType.Permenant,
+                Contracts = new AccountContractDto[]
+                {
+                    new AccountContractDto
+                    { ChargeType="Dd",
+                       InActive = true,
+                       Product ="sttd",
+                       Ratesheet ="dhdjh"
+                        
+                    },
+                    new AccountContractDto
+                    { ChargeType="Dd",
+                       InActive = true,
+                       Product ="sttd",
+                       Ratesheet ="dhdjh"
+
+                    },new AccountContractDto
+                    { ChargeType="Dd",
+                       InActive = true,
+                       Product ="sttd",
+                       Ratesheet ="dhdjh"
+
+                    }
+
+
+                }
+              
 
             }, new Employee
             {
-                Phones = new[] { "899", "635", "7877" },
+                Phones = new[] { "899", "635" },
                 Name = "yaser",
                 EndDate = DateTime.UtcNow,
                 Id=2,
@@ -78,6 +105,9 @@ namespace SW.Content.UnitTests
             emps2[0].Name = "layan khater";
             emps[1].Name = "samer";
             emps2[0].Phones = new string[0];
+            emps2[0].Contracts = new AccountContractDto[0];
+            emps2[0].Contracts = new AccountContractDto[0];
+            emps2[1].Phones = new string[] { "899" };
 
           
             await repo.UpdateDocuments(docs.ToArray());
@@ -88,7 +118,9 @@ namespace SW.Content.UnitTests
                 .Include(d => d.Tokens)
                 .ThenInclude(d => d.Path)
                 .ToArrayAsync();
-            foreach(var d in docs3)
+     
+
+            foreach (var d in docs3)
             {
                 Assert.AreEqual(emps[(int)d.Id - 1].Name, d.Tokens.First(t => t.Path.PathString == "$.Name").ValueAsAny);
                 Assert.AreEqual(emps[(int)d.Id - 1].Phones.Length, d.Tokens.Where(t => t.Path.PathString == "$.Phones").Count());

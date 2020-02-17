@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SW.Content.UnitTests.models;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -59,7 +60,7 @@ namespace SW.Content.UnitTests
                     { "StartingSalary", new Money { Amount = 500.57m, Currency = "JOD" }
 }
                 },
-
+                Contracts = new AccountContractDto[] { new AccountContractDto { Product="ddd",Ratesheet ="dd" ,ChargeType = "dd",InActive =true} },
                 Id = 7,
 
                 EndDate = DateTime.UtcNow,
@@ -92,6 +93,8 @@ namespace SW.Content.UnitTests
         public Money Salary { get; set; }
 
         public EmploymentType? ContractType { get; set; }
+
+        public AccountContractDto[]  Contracts { get; set; }
 
         public IDictionary<string,object> Data { get; set; }
     }

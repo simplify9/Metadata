@@ -13,8 +13,11 @@ namespace SW.Content.Search
     public class IndexService
     {
         readonly IIndexRepo _repo;
-        
-        
+        public IndexService(IIndexRepo repo)
+        {
+            _repo = repo;
+        }
+
         public UpdateIndexCommand CreateUpdateCommand(object key, object source)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
@@ -63,9 +66,6 @@ namespace SW.Content.Search
             
         }
         
-        public IndexService(IIndexRepo repo)
-        {
-            _repo = repo;
-        }
+      
     }
 }

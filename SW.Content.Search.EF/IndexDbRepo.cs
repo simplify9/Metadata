@@ -166,7 +166,7 @@ namespace SW.Content.Search.EF
                 .Where(t => oldTokens.Any(dbt => t.SourcePath.Equals(dbt.SourcePath) && t.Source.Equals(dbt.Source) && !t.Raw.Equals(dbt.Raw))
                  );
 
-            var deletedTokens = oldTokens.Where(t => !newTokens.Any(nt => nt.Source.Equals(t.Source) && t.SourcePath.Path.Equals(nt.SourcePath.Path)));
+            var deletedTokens = oldTokens.Where(t => !newTokens.Any(nt => nt.Source.Equals(t.Source) && t.SourcePath.Equals(nt.SourcePath)));
             
             var stringBuilder = new StringBuilderHelper();
             // add is 0 ,1 is update and delete is 2
@@ -180,7 +180,6 @@ namespace SW.Content.Search.EF
             var conn = _dbc.Database.GetDbConnection();
 
             var schemaNamePrefix = conn.ToString() == "Microsoft.Data.Sqlite.SqliteConnection" ? string.Empty : $"[{schemaName}].";
-           // var schemaStr = schemaName == string.Empty ? string.Empty : $"[{schemaName}].";
 
 
             foreach (var chg in addAndUpdateAndDeletebulks)
