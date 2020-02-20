@@ -24,15 +24,15 @@ namespace SW.Content.Search.EF
         {
             _dbc = dbc;
             docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
-            schemaName = docTokenModel.Relational().Schema;
+            schemaName = docTokenModel.GetSchema();
             _logger = logger;
 
         }
 
         static string GetKeyFieldName(DocumentSource source)
         {
-            if (source.Key is ContentNumber n) return nameof(DbDoc.SourceIdNumber);
-            if (source.Key is ContentText t) return nameof(DbDoc.SourceIdString);
+            if (source.Key is ContentNumber) return nameof(DbDoc.SourceIdNumber);
+            if (source.Key is ContentText) return nameof(DbDoc.SourceIdString);
             throw new NotSupportedException("Key type not supported");
         }
 

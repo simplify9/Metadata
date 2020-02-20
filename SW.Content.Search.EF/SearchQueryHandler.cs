@@ -28,7 +28,7 @@ namespace SW.Content.Search.EF
         static SearchQueryHandler()
         {
             //Create Generic Any Method
-            Func<MethodInfo, bool> methodLambda = m => m.Name == nameof(Enumerable.Any) && m.GetParameters().Length == 2;
+            static bool methodLambda(MethodInfo m) => m.Name == nameof(Enumerable.Any) && m.GetParameters().Length == 2;
             _anyMethod = typeof(Enumerable).GetMethods().Where(methodLambda).Single().MakeGenericMethod(typeof(DbDocToken));
           
         }
@@ -39,10 +39,10 @@ namespace SW.Content.Search.EF
         {
             _dbc = dbc;
             docTokenModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDocToken));
-            schemaName = docTokenModel.Relational().Schema;
-            docTokenTableName = docTokenModel.Relational().TableName;
+            schemaName = docTokenModel.GetSchema();
+            docTokenTableName = docTokenModel.GetTableName();
             docModel = _dbc.Model.FindRuntimeEntityType(typeof(DbDoc));
-            docTableName = docModel.Relational().TableName;
+            docTableName = docModel.GetTableName();
         }
         
         public async Task<SearchQueryResult<T>> Handle<T>(SearchQuery query)
@@ -53,8 +53,8 @@ namespace SW.Content.Search.EF
             string withPagingstringQuery = SqlResolver.ResolveSqlText(query,(p)=>pathes.First(k=>k.PathString==p).Id,$"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]");
             string withoutSortingString = SqlResolver.ResolveSqlText(query, (p) => pathes.First(k => k.PathString == p).Id, $"[{schemaName}].[{docTableName}]", $"[{schemaName}].[{docTokenTableName}]",true);
 
-            IQueryable<DbDoc> withoutPagingQuery = _dbc.Set<DbDoc>().FromSql(withoutSortingString);
-            IQueryable<DbDoc> withPagingQuery= _dbc.Set<DbDoc>().FromSql(withPagingstringQuery);
+            IQueryable<DbDoc> withoutPagingQuery = _dbc.Set<DbDoc>().FromSqlRaw(withoutSortingString);
+            IQueryable<DbDoc> withPagingQuery= _dbc.Set<DbDoc>().FromSqlRaw(withPagingstringQuery);
 
             // compose where
 
