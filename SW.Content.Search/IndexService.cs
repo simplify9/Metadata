@@ -36,13 +36,31 @@ namespace SW.Content.Search
             if (key == null) throw new ArgumentNullException(nameof(key));
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            var docType = new DocumentType(source.GetType());
+            
+            return CreateDropCommand(key, source.GetType());
+        }
+
+
+        public DropIndexCommand CreateDropCommand(object key, string objectTypeAssemblyQualifiedName)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (objectTypeAssemblyQualifiedName == null) throw new ArgumentNullException(nameof(objectTypeAssemblyQualifiedName));
+
+            return CreateDropCommand(key, Type.GetType(objectTypeAssemblyQualifiedName));
+        }
+
+        private DropIndexCommand CreateDropCommand(object key, Type objectType)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+            if (objectType == null) throw new ArgumentNullException(nameof(objectType));
+
+            var docType = new DocumentType(objectType);
             var docSource = new DocumentSource(docType, ContentFactory.Default.CreateFrom(key));
             return new DropIndexCommand(docSource);
         }
 
-       
-        
+
+
         public async Task Handle(params IIndexCommand[] commands)
         {
             // update document(s) tokens
