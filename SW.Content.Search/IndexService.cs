@@ -37,11 +37,10 @@ namespace SW.Content.Search
             if (source == null) throw new ArgumentNullException(nameof(source));
 
             
-            return CreateDropCommand(key, source.GetType());
+            return CreateDropCommandByType(key, source.GetType());
         }
 
-
-        public DropIndexCommand CreateDropCommand(object key, Type objectType)
+        public DropIndexCommand CreateDropCommandByType(object key, Type objectType)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
             if (objectType == null) throw new ArgumentNullException(nameof(objectType));
