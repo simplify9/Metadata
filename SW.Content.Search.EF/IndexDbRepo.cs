@@ -231,7 +231,7 @@ namespace SW.Content.Search.EF
                 {
                     if (conn.State == ConnectionState.Closed)
                     {
-                        conn.Open();
+                        await conn.OpenAsync();
                         manualOpen = true;
                     }
                     var u = await comm.ExecuteNonQueryAsync();
@@ -246,7 +246,7 @@ namespace SW.Content.Search.EF
                 finally
                 {
                     if (manualOpen && conn.State == ConnectionState.Open)
-                         conn.Close();
+                         await conn.CloseAsync();
                 }
 
 
