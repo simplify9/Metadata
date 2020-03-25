@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
@@ -194,6 +195,7 @@ namespace SW.Content.Search.EF
 
             var now = DateTime.UtcNow;
             var manualOpen = false;
+            
             try
             {
                 // open db connection if it's not open already
@@ -203,52 +205,72 @@ namespace SW.Content.Search.EF
                     await conn.OpenAsync();
                 }
 
-                foreach (var chg in addAndUpdateAndDeletebulks)
+                using (var trx = await conn.BeginTransactionAsync())
                 {
-                    var stringBuilder = new StringBuilderHelper();
-                    foreach (var tuple in chg)
+                    try
                     {
-                        var token = tuple.Item2;
-                        var docId = docResolver(token);
-                        var pathId = pathResolver(token);
-                        var offset = token.SourcePath.Offset;
-                        var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
-                    
-                        if (tuple.Item1 == 0)
+                        foreach (var chg in addAndUpdateAndDeletebulks)
                         {
-                            stringBuilder.Append($@"
+                            var stringBuilder = new StringBuilderHelper();
+                            foreach (var tuple in chg)
+                            {
+                                var token = tuple.Item2;
+                                var docId = docResolver(token);
+                                var pathId = pathResolver(token);
+                                var offset = token.SourcePath.Offset;
+                                var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
+
+                                if (tuple.Item1 == 0)
+                                {
+                                    stringBuilder.Append($@"
                             INSERT INTO {schemaNamePrefix}[DocTokens]
                                        ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
                                  VALUES
-                                       ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,now,now,valueAsAny);
-                        }
-                        else if (tuple.Item1 == 1)
-                        {
-                            stringBuilder.Append($@"
+                                       ( ? , ? , ? , ? , ? , ?)", docId, pathId, offset, now, now, valueAsAny);
+                                }
+                                else if (tuple.Item1 == 1)
+                                {
+                                    stringBuilder.Append($@"
                             UPDATE {schemaNamePrefix}[DocTokens]
                             SET
                                 [LastUpdatedOn] = ?,ValueAsAny = ?
                             WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
-                                    now,
-                                    valueAsAny,docId, pathId, offset);
-                        }
-                        else if(tuple.Item1 == 2)
-                        {
-                            if (pathId > 0)
-                            {
-                                stringBuilder.Append($@"
+                                            now,
+                                            valueAsAny, docId, pathId, offset);
+                                }
+                                else if (tuple.Item1 == 2)
+                                {
+                                    if (pathId > 0)
+                                    {
+                                        stringBuilder.Append($@"
                                 DELETE FROM {schemaNamePrefix}[DocTokens]
-                                    WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
+                                    WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId, pathId, offset);
+                                    }
+                                }
                             }
-                        }
-                    }
 
-                    using (var comm = stringBuilder.CreateCommand(conn))
-                    {
-                        var u = await comm.ExecuteNonQueryAsync();
-                        _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
+                            using (var comm = stringBuilder.CreateCommand(conn))
+                            {
+                                var u = await comm.ExecuteNonQueryAsync();
+                                _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
+                            }
+
+                        }
+
+                        await trx.CommitAsync();
+
                     }
+                    catch (Exception)
+                    {
+                        await trx.RollbackAsync();
+                        throw;
+                    }
+                    
+                    
+
+                    
                 }
+            
             }
             finally
             {
