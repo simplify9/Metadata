@@ -251,6 +251,7 @@ namespace SW.Content.Search.EF
 
                             using (var comm = stringBuilder.CreateCommand(conn))
                             {
+                                comm.Transaction = trx;
                                 var u = await comm.ExecuteNonQueryAsync();
                                 _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
                             }
