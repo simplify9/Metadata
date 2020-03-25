@@ -128,8 +128,7 @@ namespace SW.Content.Search.EF
 
             doc.LastIndexOn = DateTime.UtcNow;
             doc.BodyEncoding = "application/json";
-            doc.BodyData = JsonUtil.Serialize( sourceData);
-
+            doc.BodyData = JsonUtil.Serialize(sourceData);
         }
 
         void AddOrUpdatePath(DocumentToken token)
@@ -141,6 +140,7 @@ namespace SW.Content.Search.EF
                 .FirstOrDefault(p =>
                     p.DocumentType == token.Source.Type.Name &&
                     p.PathString == pathString);
+
             if (path == null)
             {
                 path = new DbDocSourcePath
@@ -153,113 +153,120 @@ namespace SW.Content.Search.EF
             }
         }
 
-        
-        private async Task SaveTokens(DocumentToken[] newTokens, 
+        async Task SaveTokens(DocumentToken[] newTokens, 
             DocumentToken[] oldTokens, 
             Func<DocumentToken,long> docResolver, 
             Func<DocumentToken,int> pathResolver)
         {
+            // compare old tokens with new tokens
+
             var addedTokens = newTokens
-                .Where(t => !oldTokens.Any(dbt => t.SourcePath.Equals(dbt.SourcePath) && t.Source.Equals(dbt.Source)));
+                .Where(t => !oldTokens
+                    .Any(dbt => 
+                        t.SourcePath.Equals(dbt.SourcePath) && 
+                        t.Source.Equals(dbt.Source)));
 
             var updatedTokens = newTokens
-                .Where(t => oldTokens.Any(dbt => t.SourcePath.Equals(dbt.SourcePath) && t.Source.Equals(dbt.Source) && !t.Raw.Equals(dbt.Raw))
-                 );
+                .Where(t => oldTokens
+                    .Any(dbt => 
+                        t.SourcePath.Equals(dbt.SourcePath) && 
+                        t.Source.Equals(dbt.Source) && 
+                        !t.Raw.Equals(dbt.Raw)));
 
-            var deletedTokens = oldTokens.Where(t => !newTokens.Any(nt => nt.Source.Equals(t.Source) && t.SourcePath.Equals(nt.SourcePath)));
+            var deletedTokens = oldTokens
+                .Where(t => !newTokens
+                    .Any(nt => 
+                        nt.Source.Equals(t.Source) && 
+                        t.SourcePath.Equals(nt.SourcePath)));
             
-            var stringBuilder = new StringBuilderHelper();
             // add is 0 ,1 is update and delete is 2
-            var addAndMergeUpdatesAndDeletes = addedTokens.Select(a => new Tuple<int,DocumentToken>(0,a)).Concat(
-                updatedTokens.Select(u => new Tuple<int, DocumentToken>(1, u))
-                .Concat(
-                    deletedTokens.Select(d => new Tuple<int, DocumentToken>(2, d))
-                    )
-                );
-            var addAndUpdateAndDeletebulks = addAndMergeUpdatesAndDeletes.ToBatch(50, t => t);
-            var conn = _dbc.Database.GetDbConnection();
+            var addAndMergeUpdatesAndDeletes = addedTokens
+                .Select(a => new Tuple<int, DocumentToken>(0, a))
+                .Concat(updatedTokens.Select(u => new Tuple<int, DocumentToken>(1, u))
+                .Concat(deletedTokens.Select(d => new Tuple<int, DocumentToken>(2, d)))).ToArray();
 
+            var addAndUpdateAndDeletebulks = addAndMergeUpdatesAndDeletes.ToBatch(25, t => t);
+
+            // build SQL query batches
+
+            var conn = _dbc.Database.GetDbConnection();
             var schemaNamePrefix = conn.ToString() == "Microsoft.Data.Sqlite.SqliteConnection" ? string.Empty : $"[{schemaName}].";
 
-
-            foreach (var chg in addAndUpdateAndDeletebulks)
+            var now = DateTime.UtcNow;
+            var manualOpen = false;
+            try
             {
-                foreach (var tuple in chg)
+                // open db connection if it's not open already
+                if (conn.State == ConnectionState.Closed)
                 {
-                    var token = tuple.Item2;
-                    var docId = docResolver(token);
-                    var pathId = pathResolver(token);
-                    var offset = token.SourcePath.Offset;
-                    var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
-                    var lastUpdated = DateTime.UtcNow;
+                    manualOpen = true;
+                    await conn.OpenAsync();
+                }
 
-
-                    if (tuple.Item1 == 0)
+                foreach (var chg in addAndUpdateAndDeletebulks)
+                {
+                    var stringBuilder = new StringBuilderHelper();
+                    foreach (var tuple in chg)
                     {
-                        var createdOn = DateTime.UtcNow;
-                        stringBuilder.Append($@"
-                        INSERT INTO {schemaNamePrefix}[DocTokens]
-                                   ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
-                             VALUES
-                                   ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,createdOn,lastUpdated,valueAsAny);
-
-                    }
-                    else if (tuple.Item1 == 1)
-                    {
-                        stringBuilder.Append($@"
-                        UPDATE {schemaNamePrefix}[DocTokens]
-                        SET
-                            [LastUpdatedOn] = ?,ValueAsAny = ?
-                        WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
-                                lastUpdated,
-                                valueAsAny,docId, pathId, offset);
-                    }
-                    else if(tuple.Item1 == 2)
-                    {
-                        if (pathId > 0)
+                        var token = tuple.Item2;
+                        var docId = docResolver(token);
+                        var pathId = pathResolver(token);
+                        var offset = token.SourcePath.Offset;
+                        var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
+                    
+                        if (tuple.Item1 == 0)
                         {
                             stringBuilder.Append($@"
-                            DELETE FROM {schemaNamePrefix}[DocTokens]
-                                WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
+                            INSERT INTO {schemaNamePrefix}[DocTokens]
+                                       ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
+                                 VALUES
+                                       ( ? , ? , ? , ? , ? , ?)",docId,pathId,offset,now,now,valueAsAny);
+                        }
+                        else if (tuple.Item1 == 1)
+                        {
+                            stringBuilder.Append($@"
+                            UPDATE {schemaNamePrefix}[DocTokens]
+                            SET
+                                [LastUpdatedOn] = ?,ValueAsAny = ?
+                            WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
+                                    now,
+                                    valueAsAny,docId, pathId, offset);
+                        }
+                        else if(tuple.Item1 == 2)
+                        {
+                            if (pathId > 0)
+                            {
+                                stringBuilder.Append($@"
+                                DELETE FROM {schemaNamePrefix}[DocTokens]
+                                    WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId , pathId, offset );
+                            }
                         }
                     }
-                }
 
-                var comm = stringBuilder.CreateCommand(conn);
-                var manualOpen = false;
-                try
-                {
-                    if (conn.State == ConnectionState.Closed)
+                    using (var comm = stringBuilder.CreateCommand(conn))
                     {
-                        await conn.OpenAsync();
-                        manualOpen = true;
+                        var u = await comm.ExecuteNonQueryAsync();
+                        _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
                     }
-                    var u = await comm.ExecuteNonQueryAsync();
-                    _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
-                    stringBuilder.Clear();
                 }
-                catch(Exception ex) 
+            }
+            finally
+            {
+                if (manualOpen && conn.State == ConnectionState.Open)
                 {
-                    throw new Exception("IO Execption: SaveTokens->IndexDbRepo",ex);
-
+                    await conn.CloseAsync();
                 }
-                finally
-                {
-                    if (manualOpen && conn.State == ConnectionState.Open)
-                         await conn.CloseAsync();
-                }
-
-
-
             }
         }
 
         public async Task DeleteDocuments(DocumentSource[] sources)
         {
-            var docsToDelete = BuildDocumentSetQueryable(sources).Include(d => d.Tokens);
-            foreach (var doc in docsToDelete.ToList())
+            var docsToDelete = await BuildDocumentSetQueryable(sources).Include(d => d.Tokens).ToArrayAsync();
+           
+            foreach (var doc in docsToDelete)
             {
-                foreach (var docToken in doc.Tokens.ToList()) doc.Tokens.Remove(docToken);
+                var tokens = doc.Tokens.ToArray();
+                foreach (var docToken in tokens) doc.Tokens.Remove(docToken);
                 _dbc.Remove(doc);
             }
 
@@ -275,14 +282,12 @@ namespace SW.Content.Search.EF
             var oldTokens = dbDocs.SelectMany(doc =>
                TokenHelper.GetTokens(
                    new DocumentSource(
-                       new DocumentType(Type.GetType(doc.SourceType)), ContentFactory.Default.CreateFrom(doc.SourceIdString)
-                       ),
-                   ContentFactory.Default.CreateFrom(JsonUtil.Deserialize<JToken>(doc.BodyData)).ToJson()
-                   )
+                       new DocumentType(Type.GetType(doc.SourceType)), 
+                       ContentFactory.Default.CreateFrom(doc.SourceIdString)),
+                   ContentFactory.Default.CreateFrom(JsonUtil.Deserialize<JToken>(doc.BodyData)).ToJson())
                 ).ToArray();
 
             foreach (var doc in docs) AddOrUpdateDocument(doc.Source, doc.Data);
-
 
             // ensure paths
             var types = docs.Select(t => t.Source.Type.Name).Distinct();

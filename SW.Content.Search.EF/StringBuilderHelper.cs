@@ -58,6 +58,7 @@ namespace SW.Content.Search.EF
             }
             return cmd;
         }
+
         public void Clear()
         {
             sb.Clear();

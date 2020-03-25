@@ -11,7 +11,10 @@ namespace SW.Content.Search.EF
         {
             var count = source.Count();
             return Enumerable.Range(0, count / batchSize + ((count % batchSize > 0) ? 1 : 0))
-                .Select(i => source.Skip(i * 50).Take(50).Select(selector));
+                .Select(i => source
+                    .Skip(i * batchSize)
+                    .Take(batchSize)
+                    .Select(selector));
         }
     }
 }
