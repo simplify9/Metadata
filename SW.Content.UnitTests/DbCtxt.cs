@@ -15,7 +15,7 @@ namespace SW.Content.UnitTests
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            SearchExtensions.AddContentSearchIndex(modelBuilder);
+            ModelBuilderExtensions.AddContentSearchIndex(modelBuilder);
 
 
         

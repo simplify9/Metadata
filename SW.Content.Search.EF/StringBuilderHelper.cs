@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SW.Content.Search.EF
 {
@@ -57,6 +59,11 @@ namespace SW.Content.Search.EF
                 cmd.Parameters.Add(p);
             }
             return cmd;
+        }
+
+        public async Task ExecuteSqlCommand(DbContext dbc)
+        {
+            await dbc.Database.ExecuteSqlRawAsync(sb.ToString(), data.ToArray());
         }
 
         public void Clear()

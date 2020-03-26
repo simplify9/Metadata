@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SW.Content.Search.EF
 {
-    public static class SearchExtensions
+    public static class ModelBuilderExtensions
     {
         public static void AddContentSearchIndex(this ModelBuilder b, string schemaName = "search")
         {
@@ -22,12 +22,9 @@ namespace SW.Content.Search.EF
             token.ToTable("DocTokens", schemaName);
             token.HasKey(t => t.Id);
             token.HasOne(t => t.Path).WithMany();
-           // token.Property(t => t.ValueAsString).IsUnicode(true).HasMaxLength(512);
             token.Property(t => t.ValueAsAny).IsUnicode(true).HasMaxLength(512);
             token.HasIndex(new string[] { "PathId", "ValueAsAny" });
             token.HasIndex(t=>t.ValueAsAny);
-
-            //token.Property(t => t.ValueAsNumber).HasColumnType("DECIMAL(19,6)");
 
             var path = b.Entity<DbDocSourcePath>();
             path.ToTable("DocPaths", schemaName);

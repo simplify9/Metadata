@@ -72,47 +72,30 @@ namespace SW.Content.Search.EF
             return _dbc.Set<DbDoc>().Where(expr);
         }
 
-        static long GetDocumentPersistenceId(IEnumerable<DbDoc> docs, DocumentSource source)
+        static DbDoc FindDocument(IEnumerable<DbDoc> docs, DocumentSource source)
         {
-            docs = docs.Where(d => d.SourceType == source.Type.Name);
+            var docsWithType = docs.Where(d => d.SourceType == source.Type.Name);
             if (source.Key is ContentNumber n)
             {
                 var v = decimal.ToInt64(n.Value);
-                docs = docs.Where(d => d.SourceIdNumber == v);
+                docsWithType = docsWithType.Where(d => d.SourceIdNumber == v);
             }
             else if (source.Key is ContentText t)
             {
-                docs = docs.Where(d => d.SourceIdString == t.Value);
+                docsWithType = docsWithType.Where(d => d.SourceIdString == t.Value);
             }
             else
             {
                 throw new NotSupportedException("Document has a key of type that is not supported");
             }
 
-            return docs.Select(d => d.Id).FirstOrDefault();
+            return docsWithType.FirstOrDefault();
         }
 
         void AddOrUpdateDocument(DocumentSource source, object sourceData)
         {
-            var docs = _dbc.ChangeTracker.Entries<DbDoc>()
-                .Select(e => e.Entity)
-                .Where(d => d.SourceType == source.Type.Name);
-
-            if (source.Key is ContentNumber n)
-            {
-                var v = decimal.ToInt64(n.Value);
-                docs = docs.Where(d => d.SourceIdNumber == v);
-            }
-            else if (source.Key is ContentText t)
-            {
-                docs = docs.Where(d => d.SourceIdString == t.Value);
-            }
-            else
-            {
-                throw new NotSupportedException("Document has a key of type that is not supported");
-            }
-
-            var doc = docs.FirstOrDefault();
+            var docs = _dbc.ChangeTracker.Entries<DbDoc>().Select(d => d.Entity);
+            var doc = FindDocument(docs, source);
             if (doc == null)
             {
                 doc = new DbDoc
@@ -124,7 +107,7 @@ namespace SW.Content.Search.EF
                     SourceType = source.Type.Name,
                     Tokens = new List<DbDocToken>()
                 };
-                _dbc.Add(doc);
+                _dbc.Set<DbDoc>().Add(doc);
             }
 
             doc.LastIndexOn = DateTime.UtcNow;
@@ -132,32 +115,10 @@ namespace SW.Content.Search.EF
             doc.BodyData = JsonUtil.Serialize(sourceData);
         }
 
-        void AddOrUpdatePath(DocumentToken token)
-        {
-            var pathString = token.SourcePath.Path.ToString();
-            var path = _dbc.ChangeTracker
-                .Entries<DbDocSourcePath>()
-                .Select(e => e.Entity)
-                .FirstOrDefault(p =>
-                    p.DocumentType == token.Source.Type.Name &&
-                    p.PathString == pathString);
-
-            if (path == null)
-            {
-                path = new DbDocSourcePath
-                {
-                    CreatedOn = DateTime.UtcNow,
-                    DocumentType = token.Source.Type.Name,
-                    PathString = pathString
-                };
-                _dbc.Add(path);
-            }
-        }
-
         async Task SaveTokens(DocumentToken[] newTokens, 
             DocumentToken[] oldTokens, 
-            Func<DocumentToken,long> docResolver, 
-            Func<DocumentToken,int> pathResolver)
+            IEnumerable<DbDoc> dbDocs,
+            IEnumerable<DbDocSourcePath> dbPaths)
         {
             // compare old tokens with new tokens
 
@@ -194,91 +155,55 @@ namespace SW.Content.Search.EF
             var schemaNamePrefix = conn.ToString() == "Microsoft.Data.Sqlite.SqliteConnection" ? string.Empty : $"[{schemaName}].";
 
             var now = DateTime.UtcNow;
-            var manualOpen = false;
             
-            try
+            foreach (var chg in addAndUpdateAndDeletebulks)
             {
-                // open db connection if it's not open already
-                if (conn.State == ConnectionState.Closed)
+                var stringBuilder = new StringBuilderHelper();
+                foreach (var tuple in chg)
                 {
-                    manualOpen = true;
-                    await conn.OpenAsync();
-                }
+                    var token = tuple.Item2;
 
-                using (var trx = await conn.BeginTransactionAsync())
-                {
-                    try
+                    var docId = FindDocument(dbDocs, token.Source)?.Id ?? 0;
+
+                    var pathString = token.SourcePath.Path.ToString();
+                    var pathId = dbPaths
+                        .First(p =>
+                            p.DocumentType == token.Source.Type.Name &&
+                            p.PathString == pathString).Id;
+
+                    var offset = token.SourcePath.Offset;
+                    var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
+
+                    if (tuple.Item1 == 0)
                     {
-                        foreach (var chg in addAndUpdateAndDeletebulks)
+                        stringBuilder.Append($@"
+                INSERT INTO {schemaNamePrefix}[DocTokens]
+                            ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
+                        VALUES
+                            ( ? , ? , ? , ? , ? , ?)", docId, pathId, offset, now, now, valueAsAny);
+                    }
+                    else if (tuple.Item1 == 1)
+                    {
+                        stringBuilder.Append($@"
+                UPDATE {schemaNamePrefix}[DocTokens]
+                SET
+                    [LastUpdatedOn] = ?,ValueAsAny = ?
+                WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
+                                now,
+                                valueAsAny, docId, pathId, offset);
+                    }
+                    else if (tuple.Item1 == 2)
+                    {
+                        if (pathId > 0)
                         {
-                            var stringBuilder = new StringBuilderHelper();
-                            foreach (var tuple in chg)
-                            {
-                                var token = tuple.Item2;
-                                var docId = docResolver(token);
-                                var pathId = pathResolver(token);
-                                var offset = token.SourcePath.Offset;
-                                var valueAsAny = ((IContentPrimitive)token.Raw).CreateMatchKey();
-
-                                if (tuple.Item1 == 0)
-                                {
-                                    stringBuilder.Append($@"
-                            INSERT INTO {schemaNamePrefix}[DocTokens]
-                                       ([DocumentId],[PathId],[Offset],[CreatedOn],[LastUpdatedOn],[ValueAsAny])
-                                 VALUES
-                                       ( ? , ? , ? , ? , ? , ?)", docId, pathId, offset, now, now, valueAsAny);
-                                }
-                                else if (tuple.Item1 == 1)
-                                {
-                                    stringBuilder.Append($@"
-                            UPDATE {schemaNamePrefix}[DocTokens]
-                            SET
-                                [LastUpdatedOn] = ?,ValueAsAny = ?
-                            WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ?",
-                                            now,
-                                            valueAsAny, docId, pathId, offset);
-                                }
-                                else if (tuple.Item1 == 2)
-                                {
-                                    if (pathId > 0)
-                                    {
-                                        stringBuilder.Append($@"
-                                DELETE FROM {schemaNamePrefix}[DocTokens]
-                                    WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId, pathId, offset);
-                                    }
-                                }
-                            }
-
-                            using (var comm = stringBuilder.CreateCommand(conn))
-                            {
-                                comm.Transaction = trx;
-                                var u = await comm.ExecuteNonQueryAsync();
-                                _logger.LogInformation($@" SOURCE: {typeof(IndexDbRepo).FullName} SQL COMMAND--{ comm.CommandText }--");
-                            }
-
+                            stringBuilder.Append($@"
+                    DELETE FROM {schemaNamePrefix}[DocTokens]
+                        WHERE [DocumentId] = ? and [PathId] = ? and [Offset] = ? ", docId, pathId, offset);
                         }
-
-                        await trx.CommitAsync();
-
                     }
-                    catch (Exception)
-                    {
-                        await trx.RollbackAsync();
-                        throw;
-                    }
-                    
-                    
+                }
 
-                    
-                }
-            
-            }
-            finally
-            {
-                if (manualOpen && conn.State == ConnectionState.Open)
-                {
-                    await conn.CloseAsync();
-                }
+                await stringBuilder.ExecuteSqlCommand(_dbc);
             }
         }
 
@@ -298,46 +223,64 @@ namespace SW.Content.Search.EF
 
         public async Task UpdateDocuments(Document[] docs)
         {
-            var dbDocs = await BuildDocumentSetQueryable(docs.Select(d => d.Source))
-                //.Include(d => d.Tokens)
-                .ToArrayAsync();
-
-            var oldTokens = dbDocs.SelectMany(doc =>
-               TokenHelper.GetTokens(
-                   new DocumentSource(
-                       new DocumentType(Type.GetType(doc.SourceType)), 
-                       ContentFactory.Default.CreateFrom(doc.SourceIdString)),
-                   ContentFactory.Default.CreateFrom(JsonUtil.Deserialize<JToken>(doc.BodyData)).ToJson())
-                ).ToArray();
-
-            foreach (var doc in docs) AddOrUpdateDocument(doc.Source, doc.Data);
-
-            // ensure paths
-            var types = docs.Select(t => t.Source.Type.Name).Distinct();
-            var paths = await _dbc.Set<DbDocSourcePath>()
-                .Where(p => types.Contains(p.DocumentType))
-                .ToArrayAsync();
-
-            var newTokens = docs.SelectMany(u => TokenHelper.GetTokens(u.Source, u.Data)).ToArray();
-
-            foreach (var t in newTokens) AddOrUpdatePath(t);
-
-            await _dbc.SaveChangesAsync();
-
-            var allDocs = _dbc.ChangeTracker.Entries<DbDoc>().Select(e => e.Entity).ToArray();
-
-            var allPaths = _dbc.ChangeTracker.Entries<DbDocSourcePath>().Select(e => e.Entity).ToArray();
-
-            await SaveTokens(newTokens, oldTokens, 
-                t => GetDocumentPersistenceId(allDocs, t.Source),
-                t =>
+            using (var trx = await _dbc.Database.BeginTransactionAsync())
+            {
+                try
                 {
-                    var pathString = t.SourcePath.Path.ToString();
-                    return allPaths
-                        .First(p =>
-                            p.DocumentType == t.Source.Type.Name &&
-                            p.PathString == pathString).Id;
-                });
+                    // load docs
+                    var dbDocs = await BuildDocumentSetQueryable(docs.Select(d => d.Source)).ToArrayAsync();
+
+                    // ensure paths
+                    var types = docs.Select(t => t.Source.Type.Name).Distinct();
+                    var paths = await _dbc.Set<DbDocSourcePath>()
+                        .Where(p => types.Contains(p.DocumentType))
+                        .ToArrayAsync();
+
+                    // get old token pairs from db doc
+                    var oldTokens = dbDocs.SelectMany(doc =>
+                       TokenHelper.GetTokens(
+                           new DocumentSource(
+                               new DocumentType(Type.GetType(doc.SourceType)),
+                               ContentFactory.Default.CreateFrom(doc.SourceIdString)),
+                           ContentFactory.Default.CreateFrom(JsonUtil.Deserialize<JToken>(doc.BodyData)).ToJson())
+                        ).ToArray();
+
+                    // add / update documents
+                    foreach (var doc in docs) AddOrUpdateDocument(doc.Source, doc.Data);
+
+                    // tokenize incoming documents
+                    var newTokens = docs.SelectMany(u => TokenHelper.GetTokens(u.Source, u.Data)).ToArray();
+
+                    // add new paths
+                    var newPaths = newTokens
+                        .Select(t => (path: t.SourcePath.Path.ToString(), docType: t.Source.Type.Name))
+                        .Where(t => !paths
+                            .Any(p => p.PathString == t.path && p.DocumentType == t.docType))
+                            .Distinct()
+                            .Select(t => new DbDocSourcePath
+                            {
+                                CreatedOn = DateTime.UtcNow,
+                                DocumentType = t.docType,
+                                PathString = t.path
+                            });
+                    _dbc.Set<DbDocSourcePath>().AddRange(newPaths);
+                    
+                    // persist docs and paths changes to generate sequence IDs
+                    await _dbc.SaveChangesAsync();
+
+                    dbDocs = _dbc.ChangeTracker.Entries<DbDoc>().Select(e => e.Entity).ToArray();
+                    paths = _dbc.ChangeTracker.Entries<DbDocSourcePath>().Select(e => e.Entity).ToArray();
+
+                    await SaveTokens(newTokens, oldTokens, dbDocs, paths);
+
+                    await trx.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await trx.RollbackAsync();
+                    throw;
+                }
+            }
         }
  
 
