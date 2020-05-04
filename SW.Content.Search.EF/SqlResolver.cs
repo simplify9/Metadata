@@ -104,6 +104,10 @@ namespace SW.Content.Search.EF
                 case Op.AnyOf:
                     op = " IN ";
                     break;
+                
+                case Op.NotIn:
+                    op = " NOT IN ";
+                    break;
 
                 case Op.Equals:
                     op = line.Value is ContentNull? " IS ": "=";

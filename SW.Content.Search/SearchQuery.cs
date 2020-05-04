@@ -17,7 +17,8 @@ namespace SW.Content.Search
             GreaterThanOrEquals,
             LessThan,
             LessThanOrEquals,
-            AnyOf
+            AnyOf,
+            NotIn
         };
 
         public class Line
